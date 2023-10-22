@@ -1,4 +1,4 @@
-use hexgem_engine::{AppEnv, Application};
+use hexgem_engine::Application;
 pub struct Sandbox {
     application: Application,
 }
@@ -8,8 +8,6 @@ impl hexgem_engine::App for Sandbox {
         let application = Application::new();
         return Sandbox { application };
     }
-
-    type Env = Application;
 }
 
 impl Sandbox {

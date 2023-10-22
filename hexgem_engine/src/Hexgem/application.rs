@@ -1,24 +1,22 @@
+use log::*;
+
 pub trait App: Sized {
-    type Env: AppEnv;
-    fn run(&self, env: &Self::Env) {
+    fn run(&self, env: &Application) {
         env.run(self);
     }
     fn create_application() -> Self;
 }
 
-pub trait AppEnv {
-    fn run<T: App>(&self, app: &T) {}
-}
 pub struct Application {}
-
-impl AppEnv for Application {
-    fn run<T: App>(&self, app: &T) {
-        while true {}
-    }
-}
 
 impl Application {
     pub fn new() -> Self {
+        info!("Application created");
         return Application {};
+    }
+
+    pub fn run<T: App>(&self, app: &T) {
+        info!("Executed app run");
+        while true {}
     }
 }
