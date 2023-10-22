@@ -1,3 +1,2 @@
 mod application;
-pub mod core;
-pub use application::Application;
+pub use application::*;
