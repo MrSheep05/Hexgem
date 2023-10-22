@@ -1,4 +1,4 @@
-use hexgem_engine::{App, HexgemLogger};
+use hexgem_engine::{error, info, App, HexgemLogger};
 use sandbox::Sandbox;
 
 mod sandbox;

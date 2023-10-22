@@ -14,25 +14,25 @@ impl log::Log for HexgemLogger {
             let level = record.level();
             let color = &level.format_color();
             let args = record.args();
-            match level {
-                Level::Error | Level::Warn => {
-                    let path = record.module_path();
-                    let code_line = record.line().unwrap_or(0);
-                    match path {
-                        Some(mod_path) => println!(
-                            "{} - {}: {} \x1b[90;3mat {}:{}",
-                            color,
-                            mod_path.get_client(),
-                            args,
-                            mod_path,
-                            code_line
-                        ),
-                        None => println!("{} - {}", color, args),
+            let path = record.module_path();
+            let code_line = record.line().unwrap_or(0);
+            match path {
+                Some(mod_path) => {
+                    let client = mod_path.get_client();
+
+                    match level {
+                        Level::Error | Level::Warn => {
+                            println!(
+                                "{} - {}: {} \x1b[90;3mat {}:{}",
+                                color, client, args, mod_path, code_line
+                            )
+                        }
+                        _ => {
+                            println!("{} - {}: {}", color, client, args)
+                        }
                     }
                 }
-                _ => {
-                    println!("{} - {}", color, args)
-                }
+                None => println!("{} - {}", color, args),
             }
         }
     }
