@@ -1,6 +1,6 @@
-use hexgem_engine::Application;
+use hexgem_engine::{Application, HexgemEvent};
 pub struct Sandbox {
-    application: Application,
+    pub application: Application,
 }
 
 impl hexgem_engine::App for Sandbox {
@@ -10,8 +10,11 @@ impl hexgem_engine::App for Sandbox {
     }
 }
 
-impl Sandbox {
-    pub fn run(&self) {
-        self.application.run(self);
+impl hexgem_engine::EventHandler for Sandbox {
+    fn handleEvent(&self, event: HexgemEvent) {
+        match event {
+            _ => (),
+        }
     }
 }
+impl hexgem_engine::HexgemApp for Sandbox {}

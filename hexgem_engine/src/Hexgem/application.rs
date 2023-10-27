@@ -1,12 +1,18 @@
 use log::*;
 
+use crate::Hexgem::hexgem_events::EventLayer;
+
+use super::hexgem_events::{EventHandler, HexgemEvent};
+
 pub trait App: Sized {
-    fn run(&self, env: &Application) {
-        env.run(self);
-    }
     fn create_application() -> Self;
 }
 
+pub trait HexgemApp: App + EventHandler {
+    fn run(&self, env: &Application) {
+        env.run(self);
+    }
+}
 pub struct Application {}
 
 impl Application {
@@ -15,8 +21,9 @@ impl Application {
         return Application {};
     }
 
-    pub fn run<T: App>(&self, app: &T) {
+    pub fn run(&self, app: &impl HexgemApp) {
         info!("Executed app run");
+        EventLayer::init(app);
         while true {}
     }
 }

@@ -1,9 +1,9 @@
-use hexgem_engine::{error, info, App, HexgemLogger};
+use hexgem_engine::{debug, error, info, warn, App, HexgemApp, HexgemLogger};
 use sandbox::Sandbox;
 
 mod sandbox;
 fn main() {
-    HexgemLogger::init();
+    HexgemLogger::init().expect("Error occured on init logger");
     let sandbox = Sandbox::create_application();
-    sandbox.run();
+    sandbox.run(&sandbox.application);
 }

@@ -1,0 +1,17 @@
+pub enum HexgemEvent {
+    None,
+    WindowClose,
+    WindowResize,
+    WindowFocus,
+    WindowLostFocus,
+    WindowMoved,
+    AppTick,
+    AppUpdate,
+    AppRender,
+    KeyPressed,
+    KeyReleased,
+    MouseButtonPressed,
+    MouseButtonReleased,
+    MouseMoved,
+    MouseScrolled,
+}
