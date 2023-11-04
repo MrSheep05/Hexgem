@@ -1,11 +1,10 @@
-use std::fmt::Display;
-
 use super::{
     application_events::EventCategoryApplication, input_events::*, keyboard_events::*,
     mouse_events::*,
 };
+use std::fmt::Display;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum HexgemEvent {
     None,
     WindowClose,
@@ -39,6 +38,7 @@ pub enum HexgemEvent {
         mouse_event: MouseScrollEvent,
     },
 }
+
 #[derive(Debug)]
 
 pub enum EventCategory {

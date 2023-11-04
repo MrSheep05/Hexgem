@@ -11,7 +11,7 @@ impl hexgem_engine::App for Sandbox {
 }
 
 impl hexgem_engine::EventHandler for Sandbox {
-    fn handle_event(&self, event: HexgemEvent) {
+    fn handle_event(&self, event: &HexgemEvent) {
         match event {
             HexgemEvent::MouseButtonPressed { .. } => {
                 info!("Category of mousePressed {}", event.get_category())

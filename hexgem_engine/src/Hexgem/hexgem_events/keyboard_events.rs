@@ -1,6 +1,6 @@
 use winit::keyboard::{KeyLocation, PhysicalKey};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct KeyEvent {
     pub key: PhysicalKey,
     pub location: KeyLocation,

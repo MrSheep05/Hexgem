@@ -1,12 +1,12 @@
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 
 pub struct WindowResizeEvent {
     pub size: PhysicalSize<u32>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 
 pub struct WindowMoveEvent {
     pub position: PhysicalPosition<i32>,

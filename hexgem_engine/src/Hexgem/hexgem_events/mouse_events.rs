@@ -3,18 +3,18 @@ use winit::{
     event::{MouseButton, MouseScrollDelta, TouchPhase},
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 
 pub struct MouseButtonEvent {
     pub button: MouseButton,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 
 pub struct MouseMovedEvent {
     pub position: PhysicalPosition<f64>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 
 pub struct MouseScrollEvent {
     pub scroll_delta: MouseScrollDelta,

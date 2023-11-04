@@ -5,4 +5,4 @@ mod log;
 pub use self::log::*;
 pub use ::log::{debug, error, info, warn};
 pub use application::*;
-pub use hexgem_events::{EventHandler, HexgemEvent};
+pub use hexgem_events::{EventHandler, EventSubscription, EventType, HexgemEvent};
