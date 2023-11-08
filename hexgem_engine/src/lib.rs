@@ -13,8 +13,7 @@ impl<T, E: Display> Unwrap<T> for Result<T, E> {
         match self {
             Ok(result) => result,
             Err(err) => {
-                error!("{} {}", message, err);
-                panic!("{}", message);
+                panic!("{}, {}", message, err);
             }
         }
     }

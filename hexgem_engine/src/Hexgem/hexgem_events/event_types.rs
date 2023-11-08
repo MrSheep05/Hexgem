@@ -8,66 +8,46 @@ use std::fmt::Display;
 pub enum HexgemEvent {
     None,
     WindowClose,
-    WindowResize {
-        resize_event: WindowResizeEvent,
-    },
+    WindowResize(WindowResizeEvent),
     WindowFocus,
     WindowLostFocus,
-    WindowMoved {
-        move_event: WindowMoveEvent,
-    },
+    WindowMoved(WindowMoveEvent),
     AppTick,
     AppUpdate,
     AppRender,
-    KeyPressed {
-        key_event: KeyEvent,
-    },
-    KeyReleased {
-        key_event: KeyEvent,
-    },
-    MouseButtonPressed {
-        mouse_button_event: MouseButtonEvent,
-    },
-    MouseButtonReleased {
-        mouse_button_event: MouseButtonEvent,
-    },
-    MouseMoved {
-        mouse_event: MouseMovedEvent,
-    },
-    MouseScrolled {
-        mouse_event: MouseScrollEvent,
-    },
+    KeyPressed(KeyEvent),
+    KeyReleased(KeyEvent),
+    MouseButtonPressed(MouseButtonEvent),
+    MouseButtonReleased(MouseButtonEvent),
+    MouseMoved(MouseMovedEvent),
+    MouseScrolled(MouseScrollEvent),
 }
 
 #[derive(Debug)]
 
 pub enum EventCategory {
     None,
-    EventCategoryApplication { event: EventCategoryApplication },
-    EventCategoryInput { event: EventCategoryInput },
-    EventCategoryKeyboard { event: EventCategoryKeyboard },
-    EventCategoryMouse { event: EventCategoryMouse },
-    EventCategoryMouseButton { event: EventCategoryMouseButton },
+    EventCategoryApplication(EventCategoryApplication),
+    EventCategoryInput(EventCategoryInput),
+    EventCategoryKeyboard(EventCategoryKeyboard),
+    EventCategoryMouse(EventCategoryMouse),
+    EventCategoryMouseButton(EventCategoryMouseButton),
 }
 
 macro_rules! event {
-    ($Variant:ident,$($event:ident)*) => {
-        HexgemEvent::$Variant { $($event)* }
+    ($Variant:ident,$event:ident) => {
+        HexgemEvent::$Variant($event)
     };
     ($Variant:ident) => {
         HexgemEvent::$Variant
     };
 }
 macro_rules! category {
-    ($Category: ident,$Variant:ident,$($event:ident)*) => {
-        EventCategory::$Category {
-            event: $Category::$Variant { $($event)* },
-        }
+    ($Category: ident,$Variant:ident,$event:ident) => {
+        EventCategory::$Category($Category::$Variant($event))
     };
     ($Category: ident,$Variant:ident) => {
-        EventCategory::$Category {
-            event: $Category::$Variant,
-        }
+        EventCategory::$Category($Category::$Variant)
     };
 }
 

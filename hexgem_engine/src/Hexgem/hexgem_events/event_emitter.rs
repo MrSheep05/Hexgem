@@ -95,11 +95,9 @@ impl EventEmitter {
             }
             None => error!("None handlers of {:?} has been found", event.clone()),
         }
-        return {
-            EventSubscription {
-                event_type: event,
-                index: new_key,
-            }
+        return EventSubscription {
+            event_type: event,
+            index: new_key,
         };
     }
 
@@ -115,7 +113,9 @@ impl EventEmitter {
         let event_type = EventType::get(event);
         if let Some(event_handlers) = self.handlers.get(&event_type) {
             for (_, handler) in event_handlers {
-                handler(event);
+                {
+                    handler(event);
+                }
             }
         };
     }

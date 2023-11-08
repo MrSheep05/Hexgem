@@ -42,19 +42,17 @@ impl EventLayer {
                         event: key_event, ..
                     } => dispatch_key_event(key_event, event_handler, event_emitter),
                     WindowEvent::CursorMoved { position, .. } => {
-                        let hexgem_event = HexgemEvent::MouseMoved {
-                            mouse_event: mouse_events::MouseMovedEvent { position },
-                        };
+                        let hexgem_event =
+                            HexgemEvent::MouseMoved(mouse_events::MouseMovedEvent { position });
                         event_emitter.emit(&hexgem_event);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
-                        let hexgem_event = HexgemEvent::MouseScrolled {
-                            mouse_event: mouse_events::MouseScrollEvent {
+                        let hexgem_event =
+                            HexgemEvent::MouseScrolled(mouse_events::MouseScrollEvent {
                                 scroll_delta: delta,
                                 phase,
-                            },
-                        };
+                            });
                         event_emitter.emit(&hexgem_event);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
@@ -67,9 +65,8 @@ impl EventLayer {
                         eventDispatch!(event_handler, &hexgem_event);
                     }
                     WindowEvent::Resized(size) => {
-                        let hexgem_event = HexgemEvent::WindowResize {
-                            resize_event: input_events::WindowResizeEvent { size },
-                        };
+                        let hexgem_event =
+                            HexgemEvent::WindowResize(input_events::WindowResizeEvent { size });
                         event_emitter.emit(&hexgem_event);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
@@ -78,9 +75,8 @@ impl EventLayer {
                         dispatch_focus_event(event_emitter, event_handler, is_focused)
                     }
                     WindowEvent::Moved(position) => {
-                        let hexgem_event = HexgemEvent::WindowMoved {
-                            move_event: input_events::WindowMoveEvent { position },
-                        };
+                        let hexgem_event =
+                            HexgemEvent::WindowMoved(input_events::WindowMoveEvent { position });
                         event_emitter.emit(&hexgem_event);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
@@ -109,16 +105,12 @@ fn dispatch_key_event(
     };
     match event.state {
         ElementState::Pressed => {
-            let hexgem_event = HexgemEvent::KeyPressed {
-                key_event: key_event.clone(),
-            };
+            let hexgem_event = HexgemEvent::KeyPressed(key_event.clone());
             event_emitter.emit(&hexgem_event);
             eventDispatch!(event_handler, &hexgem_event);
         }
         ElementState::Released => {
-            let hexgem_event = HexgemEvent::KeyReleased {
-                key_event: key_event.clone(),
-            };
+            let hexgem_event = HexgemEvent::KeyReleased(key_event.clone());
             event_emitter.emit(&hexgem_event);
 
             eventDispatch!(event_handler, &hexgem_event);
@@ -134,17 +126,15 @@ fn dispatch_mouse_input_event(
 ) {
     match state {
         ElementState::Pressed => {
-            let hexgem_event = HexgemEvent::MouseButtonPressed {
-                mouse_button_event: mouse_events::MouseButtonEvent { button },
-            };
+            let hexgem_event =
+                HexgemEvent::MouseButtonPressed(mouse_events::MouseButtonEvent { button });
             event_emitter.emit(&hexgem_event);
 
             eventDispatch!(event_handler, &hexgem_event);
         }
         ElementState::Released => {
-            let hexgem_event = HexgemEvent::MouseButtonReleased {
-                mouse_button_event: mouse_events::MouseButtonEvent { button },
-            };
+            let hexgem_event =
+                HexgemEvent::MouseButtonReleased(mouse_events::MouseButtonEvent { button });
             event_emitter.emit(&hexgem_event);
 
             eventDispatch!(event_handler, &hexgem_event);

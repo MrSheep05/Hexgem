@@ -23,16 +23,12 @@ pub struct MouseScrollEvent {
 #[derive(Debug)]
 
 pub enum EventCategoryMouse {
-    MouseMoved { mouse_event: MouseMovedEvent },
-    MouseScrolled { mouse_event: MouseScrollEvent },
+    MouseMoved(MouseMovedEvent),
+    MouseScrolled(MouseScrollEvent),
 }
 #[derive(Debug)]
 
 pub enum EventCategoryMouseButton {
-    MouseButtonPressed {
-        mouse_button_event: MouseButtonEvent,
-    },
-    MouseButtonReleased {
-        mouse_button_event: MouseButtonEvent,
-    },
+    MouseButtonPressed(MouseButtonEvent),
+    MouseButtonReleased(MouseButtonEvent),
 }

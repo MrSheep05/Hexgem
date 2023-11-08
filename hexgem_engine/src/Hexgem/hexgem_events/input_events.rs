@@ -17,6 +17,6 @@ pub enum EventCategoryInput {
     WindowClose,
     WindowFocus,
     WindowLostFocus,
-    WindowMoved { move_event: WindowMoveEvent },
-    WindowResize { resize_event: WindowResizeEvent },
+    WindowMoved(WindowMoveEvent),
+    WindowResize(WindowResizeEvent),
 }

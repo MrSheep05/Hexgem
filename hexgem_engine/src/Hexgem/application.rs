@@ -26,7 +26,6 @@ impl Application {
 
     pub fn run(&self, app: &impl HexgemApp) {
         info!("Executed app run");
-        EventLayer::init(app, &self.event_emitter);
-        while true {}
+        EventLayer::init(app, &self.event_emitter); //THAT LINE IS A LOOP
     }
 }

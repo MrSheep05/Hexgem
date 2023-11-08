@@ -1,6 +1,6 @@
-use log::*;
-
 use crate::Hexgem::level::ColorLog;
+use log::*;
+use std::panic;
 
 pub struct HexgemLogger;
 
@@ -42,6 +42,13 @@ impl log::Log for HexgemLogger {
 
 impl HexgemLogger {
     pub fn init() -> Result<(), SetLoggerError> {
+        panic::set_hook({
+            Box::new(move |info| {
+                if let Some(mess) = info.payload().downcast_ref::<&str>() {
+                    error!("{}", mess);
+                }
+            })
+        });
         println!("\x1b[2J\x1b[H");
         log::set_logger(&HexgemLogger).map(|()| log::set_max_level(LevelFilter::Debug))
     }

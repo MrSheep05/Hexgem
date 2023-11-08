@@ -9,6 +9,6 @@ pub struct KeyEvent {
 #[derive(Debug)]
 
 pub enum EventCategoryKeyboard {
-    KeyPressed { key_event: KeyEvent },
-    KeyReleased { key_event: KeyEvent },
+    KeyPressed(KeyEvent),
+    KeyReleased(KeyEvent),
 }
