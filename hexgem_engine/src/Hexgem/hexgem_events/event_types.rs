@@ -1,20 +1,17 @@
-use super::{
-    application_events::EventCategoryApplication, input_events::*, keyboard_events::*,
-    mouse_events::*,
-};
-use std::fmt::Display;
+use super::{application_events::*, input_events::*, keyboard_events::*, mouse_events::*};
+use std::{any::Any, fmt::Display};
 
 #[derive(Clone, Debug, Copy)]
 pub enum HexgemEvent {
     None,
-    WindowClose,
+    WindowClose(WindowCloseEvent),
     WindowResize(WindowResizeEvent),
-    WindowFocus,
-    WindowLostFocus,
+    WindowFocus(WindowFocusEvent),
+    WindowLostFocus(WindowLostFocusEvent),
     WindowMoved(WindowMoveEvent),
-    AppTick,
-    AppUpdate,
-    AppRender,
+    AppTick(AppTickEvent),
+    AppUpdate(AppUpdateEvent),
+    AppRender(AppRenderEvent),
     KeyPressed(KeyEvent),
     KeyReleased(KeyEvent),
     MouseButtonPressed(MouseButtonEvent),
@@ -58,6 +55,25 @@ impl Display for EventCategory {
 }
 
 impl HexgemEvent {
+    pub fn get_event(&self) -> &dyn Any {
+        return match self {
+            HexgemEvent::None => &(),
+            HexgemEvent::WindowClose(e) => e,
+            HexgemEvent::WindowResize(e) => e,
+            HexgemEvent::WindowFocus(e) => e,
+            HexgemEvent::WindowLostFocus(e) => e,
+            HexgemEvent::WindowMoved(e) => e,
+            HexgemEvent::AppTick(e) => e,
+            HexgemEvent::AppUpdate(e) => e,
+            HexgemEvent::AppRender(e) => e,
+            HexgemEvent::KeyPressed(e) => e,
+            HexgemEvent::KeyReleased(e) => e,
+            HexgemEvent::MouseButtonPressed(e) => e,
+            HexgemEvent::MouseButtonReleased(e) => e,
+            HexgemEvent::MouseMoved(e) => e,
+            HexgemEvent::MouseScrolled(e) => e,
+        };
+    }
     pub fn get_category(self) -> EventCategory {
         return match self {
             HexgemEvent::None => EventCategory::None,
@@ -84,21 +100,29 @@ impl HexgemEvent {
             event!(KeyReleased, key_event) => {
                 category!(EventCategoryKeyboard, KeyReleased, key_event)
             }
-            event!(WindowClose) => {
-                category!(EventCategoryInput, WindowClose)
+            event!(WindowClose, close_event) => {
+                category!(EventCategoryInput, WindowClose, close_event)
             }
             event!(WindowResize, resize_event) => {
                 category!(EventCategoryInput, WindowResize, resize_event)
             }
 
-            event!(WindowFocus) => category!(EventCategoryInput, WindowFocus),
-            event!(WindowLostFocus) => category!(EventCategoryInput, WindowLostFocus),
+            event!(WindowFocus, focus_event) => {
+                category!(EventCategoryInput, WindowFocus, focus_event)
+            }
+            event!(WindowLostFocus, focus_event) => {
+                category!(EventCategoryInput, WindowLostFocus, focus_event)
+            }
             event!(WindowMoved, move_event) => {
                 category!(EventCategoryInput, WindowMoved, move_event)
             }
-            event!(AppTick) => category!(EventCategoryApplication, AppTick),
-            event!(AppUpdate) => category!(EventCategoryApplication, AppUpdate),
-            event!(AppRender) => category!(EventCategoryApplication, AppRender),
+            event!(AppTick, app_event) => category!(EventCategoryApplication, AppTick, app_event),
+            event!(AppUpdate, app_event) => {
+                category!(EventCategoryApplication, AppUpdate, app_event)
+            }
+            event!(AppRender, app_event) => {
+                category!(EventCategoryApplication, AppRender, app_event)
+            }
         };
     }
 }

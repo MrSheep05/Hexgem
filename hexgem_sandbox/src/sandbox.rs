@@ -9,17 +9,19 @@ impl hexgem_engine::App for Sandbox {
 
         application
             .event_emitter
-            .on(hexgem_engine::EventType::MouseButtonPressed, &|_| {
-                info!("BOMB");
+            .on(hexgem_engine::EventType::MouseButtonPressed, &|event| {
+                match event.downcast_ref::<hexgem_engine::HexgemEvents::MouseButtonEvent>() {
+                    Some(mouse_event) => info!("{:?}", mouse_event.button),
+                    None => panic!("Some error does not match"),
+                }
             });
 
         {
-            application.event_emitter.on(
-                hexgem_engine::EventType::MouseButtonReleased,
-                &move |_| {
+            application
+                .event_emitter
+                .on(hexgem_engine::EventType::MouseButtonReleased, &|_| {
                     info!("BOOM");
-                },
-            );
+                });
         }
         return Sandbox {
             application: application,

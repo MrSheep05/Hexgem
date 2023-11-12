@@ -1,4 +1,10 @@
-use crate::{Hexgem::hexgem_events::*, Unwrap};
+use crate::{
+    Hexgem::hexgem_events::{
+        input_events::{WindowCloseEvent, WindowFocusEvent, WindowLostFocusEvent},
+        *,
+    },
+    Unwrap,
+};
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
@@ -60,7 +66,7 @@ impl EventLayer {
                         dispatch_mouse_input_event(event_emitter, event_handler, state, button)
                     }
                     WindowEvent::CloseRequested => {
-                        let hexgem_event = HexgemEvent::WindowClose;
+                        let hexgem_event = HexgemEvent::WindowClose(WindowCloseEvent {});
                         event_emitter.emit(&hexgem_event);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
@@ -148,11 +154,11 @@ fn dispatch_focus_event(
     is_focused: bool,
 ) {
     if is_focused {
-        let hexgem_event = HexgemEvent::WindowFocus;
+        let hexgem_event = HexgemEvent::WindowFocus(WindowFocusEvent {});
         event_emitter.emit(&hexgem_event);
         eventDispatch!(event_handler, &hexgem_event);
     } else {
-        let hexgem_event = HexgemEvent::WindowLostFocus;
+        let hexgem_event = HexgemEvent::WindowLostFocus(WindowLostFocusEvent {});
         event_emitter.emit(&hexgem_event);
         eventDispatch!(event_handler, &hexgem_event);
     }

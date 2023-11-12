@@ -1,10 +1,10 @@
-use std::collections::HashMap;
+use std::{any::Any, collections::HashMap};
 
 use log::error;
 
-use crate::HexgemEvent;
+use super::HexgemEvent;
 
-type HandlerFn = Box<&'static dyn Fn(&HexgemEvent)>;
+type HandlerFn = Box<&'static dyn Fn(&Box<&dyn Any>)>;
 pub struct EventEmitter {
     handlers: HashMap<EventType, HashMap<i32, HandlerFn>>,
     keys: HashMap<EventType, Vec<i32>>,
@@ -33,14 +33,14 @@ impl EventType {
     pub fn get(event: &HexgemEvent) -> Self {
         return match event {
             HexgemEvent::None => EventType::None,
-            HexgemEvent::WindowClose => EventType::WindowClose,
+            HexgemEvent::WindowClose { .. } => EventType::WindowClose,
             HexgemEvent::WindowResize { .. } => EventType::WindowResize,
-            HexgemEvent::WindowFocus => EventType::WindowFocus,
-            HexgemEvent::WindowLostFocus => EventType::WindowLostFocus,
+            HexgemEvent::WindowFocus { .. } => EventType::WindowFocus,
+            HexgemEvent::WindowLostFocus { .. } => EventType::WindowLostFocus,
             HexgemEvent::WindowMoved { .. } => EventType::WindowMoved,
-            HexgemEvent::AppTick => EventType::AppTick,
-            HexgemEvent::AppUpdate => EventType::AppUpdate,
-            HexgemEvent::AppRender => EventType::AppRender,
+            HexgemEvent::AppTick { .. } => EventType::AppTick,
+            HexgemEvent::AppUpdate { .. } => EventType::AppUpdate,
+            HexgemEvent::AppRender { .. } => EventType::AppRender,
             HexgemEvent::KeyPressed { .. } => EventType::KeyPressed,
             HexgemEvent::KeyReleased { .. } => EventType::KeyReleased,
             HexgemEvent::MouseButtonPressed { .. } => EventType::MouseButtonPressed,
@@ -66,7 +66,7 @@ impl EventEmitter {
     pub fn on(
         &mut self,
         event: EventType,
-        handler: &'static dyn Fn(&HexgemEvent),
+        handler: &'static dyn Fn(&Box<&dyn Any>),
     ) -> EventSubscription {
         let new_key = self
             .keys
@@ -111,10 +111,11 @@ impl EventEmitter {
 
     pub fn emit(&self, event: &HexgemEvent) {
         let event_type = EventType::get(event);
+        let event_content = Box::new(event.get_event());
         if let Some(event_handlers) = self.handlers.get(&event_type) {
             for (_, handler) in event_handlers {
                 {
-                    handler(event);
+                    handler(&event_content);
                 }
             }
         };
