@@ -56,7 +56,7 @@ impl Display for EventCategory {
 
 impl HexgemEvent {
     pub fn get_event(&self) -> &dyn Any {
-        return match self {
+        match self {
             HexgemEvent::None => &(),
             HexgemEvent::WindowClose(e) => e,
             HexgemEvent::WindowResize(e) => e,
@@ -72,7 +72,7 @@ impl HexgemEvent {
             HexgemEvent::MouseButtonReleased(e) => e,
             HexgemEvent::MouseMoved(e) => e,
             HexgemEvent::MouseScrolled(e) => e,
-        };
+        }
     }
     pub fn get_category(self) -> EventCategory {
         return match self {

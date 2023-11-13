@@ -1,10 +1,11 @@
 use std::{any::Any, collections::HashMap};
 
 use log::error;
+use winit::event;
 
 use super::HexgemEvent;
 
-type HandlerFn = Box<&'static dyn Fn(&Box<&dyn Any>)>;
+type HandlerFn = Box<dyn Fn(&Box<&dyn Any>)>;
 pub struct EventEmitter {
     handlers: HashMap<EventType, HashMap<i32, HandlerFn>>,
     keys: HashMap<EventType, Vec<i32>>,
@@ -63,11 +64,7 @@ impl EventEmitter {
         };
     }
 
-    pub fn on(
-        &mut self,
-        event: EventType,
-        handler: &'static dyn Fn(&Box<&dyn Any>),
-    ) -> EventSubscription {
+    fn on(&mut self, event: EventType, handler: Box<dyn Fn(&Box<&dyn Any>)>) -> EventSubscription {
         let new_key = self
             .keys
             .entry(event.clone())
@@ -78,10 +75,10 @@ impl EventEmitter {
             + &1;
         self.handlers
             .entry(event.clone())
-            .and_modify(|prev| {
-                prev.insert(new_key.clone(), Box::new(handler));
-            })
-            .or_insert(HashMap::from([(new_key.clone(), Box::new(handler))]));
+            .or_insert_with(|| HashMap::new());
+        self.handlers.entry(event.clone()).and_modify(|prev| {
+            prev.insert(new_key.clone(), handler);
+        });
         match self.handlers.get(&event) {
             Some(some) => {
                 if some.get(&new_key).is_some() {
@@ -111,13 +108,30 @@ impl EventEmitter {
 
     pub fn emit(&self, event: &HexgemEvent) {
         let event_type = EventType::get(event);
-        let event_content = Box::new(event.get_event());
+        let event_content = event.get_event();
         if let Some(event_handlers) = self.handlers.get(&event_type) {
             for (_, handler) in event_handlers {
                 {
-                    handler(&event_content);
+                    handler(&Box::new(event_content));
                 }
             }
         };
+    }
+
+    pub fn listen_on<T: 'static, F>(
+        &mut self,
+        event_type: EventType,
+        handler: F,
+    ) -> EventSubscription
+    where
+        F: Fn(&T) -> () + 'static,
+    {
+        self.on(
+            event_type.clone(),
+            Box::new(move |event| match event.downcast_ref::<T>() {
+                Some(event) => handler(event),
+                None => panic!("Cannot downcast Box<&dyn Any> to desired type!"),
+            }),
+        )
     }
 }
