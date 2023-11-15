@@ -15,16 +15,17 @@ impl log::Log for HexgemLogger {
             let color = &level.format_color();
             let args = record.args();
             let path = record.module_path();
+            let file_path = record.file();
             let code_line = record.line().unwrap_or(0);
-            match path {
-                Some(mod_path) => {
+            match (path, file_path) {
+                (Some(mod_path), Some(path)) => {
                     let client = mod_path.get_client();
 
                     match level {
                         Level::Error | Level::Warn => {
                             println!(
-                                "{} - {}: {} \x1b[90;3mat {}:{}",
-                                color, client, args, mod_path, code_line
+                                "{} - {}: {}\x1b[90;3min {} at {}:{}",
+                                color, client, args, path, mod_path, code_line
                             )
                         }
                         _ => {
@@ -32,7 +33,7 @@ impl log::Log for HexgemLogger {
                         }
                     }
                 }
-                None => println!("{} - {}", color, args),
+                (_, _) => println!("{} - {}", color, args),
             }
         }
     }
@@ -53,11 +54,11 @@ impl HexgemLogger {
         log::set_logger(&HexgemLogger).map(|()| log::set_max_level(LevelFilter::Debug))
     }
 }
-trait Client {
+trait ClientGet {
     fn get_client(&self) -> &str;
 }
 
-impl Client for &str {
+impl ClientGet for &str {
     fn get_client(&self) -> &'static str {
         let parts = self.split("::").collect::<Vec<&str>>();
         if parts[0] == "hexgem_engine" {
