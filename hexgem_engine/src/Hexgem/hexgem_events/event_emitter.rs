@@ -1,10 +1,15 @@
 use std::{any::Any, collections::HashMap};
 
 use log::error;
+use winit::{event::MouseButton, event_loop::EventLoopWindowTarget};
+
+use crate::HexgemEvents::{WindowCloseEvent, WindowResizeEvent};
 
 use super::HexgemEvent;
 
-type HandlerFn = Box<dyn Fn(&Box<&dyn Any>)>;
+pub type HexgemWindow = EventLoopWindowTarget<()>;
+
+type HandlerFn = Box<dyn Fn(&Box<&dyn Any>, &HexgemWindow)>;
 pub struct EventEmitter {
     handlers: HashMap<EventType, HashMap<i32, HandlerFn>>,
     keys: HashMap<EventType, Vec<i32>>,
@@ -63,7 +68,11 @@ impl EventEmitter {
         };
     }
 
-    fn on(&mut self, event: EventType, handler: Box<dyn Fn(&Box<&dyn Any>)>) -> EventSubscription {
+    fn on(
+        &mut self,
+        event: EventType,
+        handler: Box<dyn Fn(&Box<&dyn Any>, &HexgemWindow)>,
+    ) -> EventSubscription {
         let new_key = self
             .keys
             .entry(event.clone())
@@ -105,13 +114,13 @@ impl EventEmitter {
         event_handler.remove_entry(&subscription.index);
     }
 
-    pub fn emit(&self, event: &HexgemEvent) {
+    pub fn emit(&self, event: &HexgemEvent, w: &HexgemWindow) {
         let event_type = EventType::get(event);
         let event_content = event.get_event();
         if let Some(event_handlers) = self.handlers.get(&event_type) {
             for (_, handler) in event_handlers {
                 {
-                    handler(&Box::new(event_content));
+                    handler(&Box::new(event_content), w);
                 }
             }
         };
@@ -123,12 +132,12 @@ impl EventEmitter {
         handler: F,
     ) -> EventSubscription
     where
-        F: Fn(&T) -> () + 'static,
+        F: Fn(&T, &HexgemWindow) -> () + 'static,
     {
         self.on(
             event_type.clone(),
-            Box::new(move |event| match event.downcast_ref::<T>() {
-                Some(event) => handler(event),
+            Box::new(move |event, w| match event.downcast_ref::<T>() {
+                Some(event) => handler(event, w),
                 None => panic!("Cannot downcast Box<&dyn Any> to desired type!"),
             }),
         )

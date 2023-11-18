@@ -7,7 +7,7 @@ use crate::{
 };
 use winit::{
     event::*,
-    event_loop::{ControlFlow, EventLoop},
+    event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
     window::{Window, WindowBuilder},
 };
 
@@ -39,18 +39,18 @@ impl EventLayer {
             .build(&event_loop)
             .get("Cannot create new window");
         event_loop
-            .run(move |event, _| match event {
+            .run(move |event, elwt| match event {
                 Event::WindowEvent {
                     event: window_event,
                     ..
                 } => match window_event {
                     WindowEvent::KeyboardInput {
                         event: key_event, ..
-                    } => dispatch_key_event(key_event, event_handler, event_emitter),
+                    } => dispatch_key_event(key_event, event_handler, event_emitter, elwt),
                     WindowEvent::CursorMoved { position, .. } => {
                         let hexgem_event =
                             HexgemEvent::MouseMoved(mouse_events::MouseMovedEvent { position });
-                        event_emitter.emit(&hexgem_event);
+                        event_emitter.emit(&hexgem_event, elwt);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
@@ -59,31 +59,35 @@ impl EventLayer {
                                 scroll_delta: delta,
                                 phase,
                             });
-                        event_emitter.emit(&hexgem_event);
+                        event_emitter.emit(&hexgem_event, elwt);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
-                    WindowEvent::MouseInput { state, button, .. } => {
-                        dispatch_mouse_input_event(event_emitter, event_handler, state, button)
-                    }
+                    WindowEvent::MouseInput { state, button, .. } => dispatch_mouse_input_event(
+                        event_emitter,
+                        event_handler,
+                        elwt,
+                        state,
+                        button,
+                    ),
                     WindowEvent::CloseRequested => {
                         let hexgem_event = HexgemEvent::WindowClose(WindowCloseEvent {});
-                        event_emitter.emit(&hexgem_event);
+                        event_emitter.emit(&hexgem_event, elwt);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
                     WindowEvent::Resized(size) => {
                         let hexgem_event =
                             HexgemEvent::WindowResize(input_events::WindowResizeEvent { size });
-                        event_emitter.emit(&hexgem_event);
+                        event_emitter.emit(&hexgem_event, elwt);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
                     // WindowEvent::ScaleFactorChanged { scale_factor, inner_size_writer } //TODO
                     WindowEvent::Focused(is_focused) => {
-                        dispatch_focus_event(event_emitter, event_handler, is_focused)
+                        dispatch_focus_event(event_emitter, event_handler, elwt, is_focused)
                     }
                     WindowEvent::Moved(position) => {
                         let hexgem_event =
                             HexgemEvent::WindowMoved(input_events::WindowMoveEvent { position });
-                        event_emitter.emit(&hexgem_event);
+                        event_emitter.emit(&hexgem_event, elwt);
                         eventDispatch!(event_handler, &hexgem_event);
                     }
                     _ => {
@@ -103,6 +107,7 @@ fn dispatch_key_event(
     event: winit::event::KeyEvent,
     event_handler: &impl EventHandler,
     event_emitter: &EventEmitter,
+    elwt: &EventLoopWindowTarget<()>,
 ) {
     let key_event = keyboard_events::KeyEvent {
         key: event.physical_key,
@@ -112,12 +117,12 @@ fn dispatch_key_event(
     match event.state {
         ElementState::Pressed => {
             let hexgem_event = HexgemEvent::KeyPressed(key_event.clone());
-            event_emitter.emit(&hexgem_event);
+            event_emitter.emit(&hexgem_event, elwt);
             eventDispatch!(event_handler, &hexgem_event);
         }
         ElementState::Released => {
             let hexgem_event = HexgemEvent::KeyReleased(key_event.clone());
-            event_emitter.emit(&hexgem_event);
+            event_emitter.emit(&hexgem_event, elwt);
 
             eventDispatch!(event_handler, &hexgem_event);
         }
@@ -127,6 +132,7 @@ fn dispatch_key_event(
 fn dispatch_mouse_input_event(
     event_emitter: &EventEmitter,
     event_handler: &impl EventHandler,
+    elwt: &EventLoopWindowTarget<()>,
     state: ElementState,
     button: MouseButton,
 ) {
@@ -134,14 +140,14 @@ fn dispatch_mouse_input_event(
         ElementState::Pressed => {
             let hexgem_event =
                 HexgemEvent::MouseButtonPressed(mouse_events::MouseButtonEvent { button });
-            event_emitter.emit(&hexgem_event);
+            event_emitter.emit(&hexgem_event, elwt);
 
             eventDispatch!(event_handler, &hexgem_event);
         }
         ElementState::Released => {
             let hexgem_event =
                 HexgemEvent::MouseButtonReleased(mouse_events::MouseButtonEvent { button });
-            event_emitter.emit(&hexgem_event);
+            event_emitter.emit(&hexgem_event, elwt);
 
             eventDispatch!(event_handler, &hexgem_event);
         }
@@ -151,15 +157,17 @@ fn dispatch_mouse_input_event(
 fn dispatch_focus_event(
     event_emitter: &EventEmitter,
     event_handler: &impl EventHandler,
+    elwt: &EventLoopWindowTarget<()>,
+
     is_focused: bool,
 ) {
     if is_focused {
         let hexgem_event = HexgemEvent::WindowFocus(WindowFocusEvent {});
-        event_emitter.emit(&hexgem_event);
+        event_emitter.emit(&hexgem_event, elwt);
         eventDispatch!(event_handler, &hexgem_event);
     } else {
         let hexgem_event = HexgemEvent::WindowLostFocus(WindowLostFocusEvent {});
-        event_emitter.emit(&hexgem_event);
+        event_emitter.emit(&hexgem_event, elwt);
         eventDispatch!(event_handler, &hexgem_event);
     }
 }

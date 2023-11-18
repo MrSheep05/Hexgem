@@ -2,7 +2,8 @@ use std::any::Any;
 
 use hexgem_engine::{
     info, Application, HexgemEvent,
-    HexgemEvents::{MouseButtonEvent, MouseScrollEvent},
+    HexgemEvents::{MouseButtonEvent, MouseScrollEvent, WindowCloseEvent},
+    HexgemWindow,
 };
 pub struct Sandbox {
     pub application: Application,
@@ -11,14 +12,21 @@ pub struct Sandbox {
 impl hexgem_engine::App for Sandbox {
     fn create_application() -> Self {
         let mut application = Application::new();
-        application.event_emitter.listen_on(
+        application.event_emitter.listen_on::<MouseButtonEvent, _>(
             hexgem_engine::EventType::MouseButtonPressed,
-            move |event: &MouseButtonEvent| info!("{:?}", event),
+            move |event, _| info!("{:?}", event),
         );
-        //This will panic!
-        // application.event_emitter.listen_on(
+        application.event_emitter.listen_on::<WindowCloseEvent, _>(
+            hexgem_engine::EventType::WindowClose,
+            move |_, elwt| {
+                info!("Closing window");
+                elwt.exit();
+            },
+        );
+        // // This will panic!
+        // application.event_emitter.listen_on::<MouseScrollEvent, _>(
         //     hexgem_engine::EventType::MouseButtonPressed,
-        //     move |event: &MouseScrollEvent| info!("{:?}", event),
+        //     move |event, _| info!("{:?}", event),
         // );
         return Sandbox {
             application: application,
