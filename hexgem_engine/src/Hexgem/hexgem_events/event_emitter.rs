@@ -1,15 +1,14 @@
 use std::{any::Any, collections::HashMap};
 
 use log::error;
-use winit::{event::MouseButton, event_loop::EventLoopWindowTarget};
+use winit::event_loop::EventLoopWindowTarget;
 
-use crate::HexgemEvents::{WindowCloseEvent, WindowResizeEvent};
+use crate::Hexgem::window_target::WindowTarget;
 
 use super::HexgemEvent;
 
-pub type HexgemWindow = EventLoopWindowTarget<()>;
-
-type HandlerFn = Box<dyn Fn(&Box<&dyn Any>, &HexgemWindow)>;
+type HexgemWindow = EventLoopWindowTarget<()>;
+type HandlerFn = Box<dyn Fn(&Box<&dyn Any>, &WindowTarget)>;
 pub struct EventEmitter {
     handlers: HashMap<EventType, HashMap<i32, HandlerFn>>,
     keys: HashMap<EventType, Vec<i32>>,
@@ -71,7 +70,7 @@ impl EventEmitter {
     fn on(
         &mut self,
         event: EventType,
-        handler: Box<dyn Fn(&Box<&dyn Any>, &HexgemWindow)>,
+        handler: Box<dyn Fn(&Box<&dyn Any>, &WindowTarget)>,
     ) -> EventSubscription {
         let new_key = self
             .keys
@@ -117,10 +116,11 @@ impl EventEmitter {
     pub fn emit(&self, event: &HexgemEvent, w: &HexgemWindow) {
         let event_type = EventType::get(event);
         let event_content = event.get_event();
+        let window_target = WindowTarget::create(w);
         if let Some(event_handlers) = self.handlers.get(&event_type) {
             for (_, handler) in event_handlers {
                 {
-                    handler(&Box::new(event_content), w);
+                    handler(&Box::new(event_content), &window_target);
                 }
             }
         };
@@ -132,7 +132,7 @@ impl EventEmitter {
         handler: F,
     ) -> EventSubscription
     where
-        F: Fn(&T, &HexgemWindow) -> () + 'static,
+        F: Fn(&T, &WindowTarget) -> () + 'static,
     {
         self.on(
             event_type.clone(),

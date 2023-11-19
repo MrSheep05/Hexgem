@@ -1,9 +1,6 @@
-use std::any::Any;
-
 use hexgem_engine::{
     info, Application, HexgemEvent,
-    HexgemEvents::{MouseButtonEvent, MouseScrollEvent, WindowCloseEvent},
-    HexgemWindow,
+    HexgemEvents::{MouseButtonEvent, WindowCloseEvent},
 };
 pub struct Sandbox {
     pub application: Application,
@@ -18,9 +15,9 @@ impl hexgem_engine::App for Sandbox {
         );
         application.event_emitter.listen_on::<WindowCloseEvent, _>(
             hexgem_engine::EventType::WindowClose,
-            move |_, elwt| {
+            move |_, wt| {
                 info!("Closing window");
-                elwt.exit();
+                wt.close();
             },
         );
         // // This will panic!
@@ -37,7 +34,7 @@ impl hexgem_engine::App for Sandbox {
 impl hexgem_engine::EventHandler for Sandbox {
     fn handle_event(&self, event: &HexgemEvent) {
         match event {
-            HexgemEvent::MouseButtonReleased { .. } => {
+            HexgemEvent::WindowClose { .. } => {
                 info!("Another use of event");
             }
             _ => (),
