@@ -1,5 +1,7 @@
 mod application;
 mod hexgem_events;
+mod layer;
+mod layer_stack;
 mod level;
 mod log;
 mod window_target;

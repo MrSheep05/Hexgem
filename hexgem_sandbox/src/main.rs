@@ -1,6 +1,4 @@
-use std::panic;
-
-use hexgem_engine::{debug, error, info, warn, App, HexgemApp, HexgemLogger};
+use hexgem_engine::{App, HexgemApp, HexgemLogger};
 use sandbox::Sandbox;
 
 mod sandbox;

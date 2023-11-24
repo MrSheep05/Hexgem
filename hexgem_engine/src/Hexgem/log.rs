@@ -24,7 +24,7 @@ impl log::Log for HexgemLogger {
                     match level {
                         Level::Error | Level::Warn => {
                             println!(
-                                "{} - {}: {}\x1b[90;3min {} at {}:{}",
+                                "{} - {}: {} \x1b[90;3min {} at {}:{}",
                                 color, client, args, path, mod_path, code_line
                             )
                         }
@@ -50,7 +50,7 @@ impl HexgemLogger {
                 }
             })
         });
-        println!("\x1b[2J\x1b[H");
+        println!("\x1bc");
         log::set_logger(&HexgemLogger).map(|()| log::set_max_level(LevelFilter::Debug))
     }
 }
