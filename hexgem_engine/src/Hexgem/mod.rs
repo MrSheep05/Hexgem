@@ -1,4 +1,5 @@
 mod application;
+mod core;
 mod hexgem_events;
 mod layer;
 mod layer_stack;
