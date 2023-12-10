@@ -1,11 +1,13 @@
+mod application_event_new;
 mod application_events;
 mod event_emitter;
 mod event_new;
 mod event_types;
 mod events;
 mod input_events;
-mod key_events_new;
+mod key_event_new;
 mod keyboard_events;
+mod mouse_event_new;
 mod mouse_events;
 pub use event_emitter::*;
 pub use event_types::*;

@@ -20,14 +20,10 @@ impl KeyEvent {
             handled: false,
         }
     }
-
-    pub fn handle(&mut self) {
-        self.handled = true;
-    }
 }
 impl Event for KeyEvent {
-    fn handled(&self) -> bool {
-        self.handled
+    fn handled(&mut self) -> &mut bool {
+        &mut self.handled
     }
 
     fn get_event_type(&self) -> super::event_new::EventType {
@@ -39,6 +35,6 @@ impl Event for KeyEvent {
     }
 
     fn get_category(&self) -> super::event_new::CategoryBitFlag {
-        EventCategory::EventCategoryKeyboard | EventCategory::EventCategoryInput
+        EventCategory::Keyboard | EventCategory::Input
     }
 }

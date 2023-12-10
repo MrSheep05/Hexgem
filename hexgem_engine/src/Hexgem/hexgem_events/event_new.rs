@@ -27,18 +27,51 @@ pub enum EventType {
 pub struct EventCategory {}
 impl EventCategory {
     pub const None: CategoryBitFlag = CategoryBitFlag(0);
-    pub const EventCategoryApplication: CategoryBitFlag = BIT(0);
-    pub const EventCategoryInput: CategoryBitFlag = BIT(1);
-    pub const EventCategoryKeyboard: CategoryBitFlag = BIT(2);
-    pub const EventCategoryMouse: CategoryBitFlag = BIT(3);
-    pub const EventCategoryMouseButton: CategoryBitFlag = BIT(4);
+    pub const Application: CategoryBitFlag = BIT(0);
+    pub const Input: CategoryBitFlag = BIT(1);
+    pub const Keyboard: CategoryBitFlag = BIT(2);
+    pub const Mouse: CategoryBitFlag = BIT(3);
+    pub const MouseButton: CategoryBitFlag = BIT(4);
 }
 
 pub trait Event {
-    fn handled(&self) -> bool;
+    fn handled(&mut self) -> &mut bool;
     fn get_event_type(&self) -> EventType;
     fn get_category(&self) -> CategoryBitFlag;
+    fn handle(&mut self) {
+        *self.handled() = true;
+    }
     fn is_in_category(&self, category: CategoryBitFlag) -> bool {
         return (self.get_category() & category).0 != 0;
     }
 }
+
+#[macro_export]
+macro_rules! eventImpl {
+    ($event:ident,$event_type:ident,$category:expr) => {
+        impl Event for $event {
+            fn handled(&mut self) -> &mut bool {
+                &mut self.handled
+            }
+
+            fn get_event_type(&self) -> EventType {
+                EventType::$event_type
+            }
+
+            fn get_category(&self) -> super::event_new::CategoryBitFlag {
+                $category
+            }
+        }
+    };
+}
+
+pub struct NoneEvent {
+    handled: bool,
+}
+
+impl NoneEvent {
+    pub fn create() -> Self {
+        Self { handled: false }
+    }
+}
+eventImpl!(NoneEvent, None, EventCategory::None);
