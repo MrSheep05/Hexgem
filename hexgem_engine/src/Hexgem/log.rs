@@ -47,6 +47,7 @@ impl log::Log for HexgemLogger {
                 }
                 (_, _) => println!("{} - {}", color, args),
             }
+            print!("\x1b[0m");
         }
     }
 

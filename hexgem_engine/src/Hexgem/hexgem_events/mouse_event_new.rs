@@ -1,9 +1,9 @@
+use crate::eventImpl;
+use std::any::Any;
 use winit::{
     dpi::PhysicalPosition,
     event::{MouseButton, MouseScrollDelta, TouchPhase},
 };
-
-use crate::eventImpl;
 
 use super::event_new::{Event, EventCategory, EventType};
 

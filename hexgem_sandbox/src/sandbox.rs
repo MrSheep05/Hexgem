@@ -13,13 +13,11 @@ impl hexgem_engine::App for Sandbox {
             hexgem_engine::EventType::MouseButtonPressed,
             move |event, _| info!("{:?}", event),
         );
-        application.event_emitter.listen_on::<WindowCloseEvent, _>(
-            hexgem_engine::EventType::WindowClose,
-            move |_, wt| {
-                info!("Closing window");
-                wt.close();
-            },
+        application.event_emitter.listen_on::<MouseButtonEvent, _>(
+            hexgem_engine::EventType::MouseButtonPressed,
+            move |event, _| info!("{:?}", event),
         );
+
         application.event_emitter.listen_on::<MouseScrollEvent, _>(
             hexgem_engine::EventType::MouseScrolled,
             |event, wi| {

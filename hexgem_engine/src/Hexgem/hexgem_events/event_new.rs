@@ -1,11 +1,12 @@
-use crate::{bitOperations, Hexgem::core::bit};
-
+use crate::{bitOperations, EventsNew::MouseButtonEvent, Hexgem::core::bit};
+use std::{any::Any, rc::Rc};
 pub struct CategoryBitFlag(u32);
 bitOperations!(CategoryBitFlag);
 
 const fn BIT(i: u8) -> CategoryBitFlag {
     CategoryBitFlag(bit(i))
 }
+#[derive(PartialEq, Debug)]
 pub enum EventType {
     None = 0,
     WindowClose,
@@ -75,3 +76,34 @@ impl NoneEvent {
     }
 }
 eventImpl!(NoneEvent, None, EventCategory::None);
+macro_rules! eventType {
+    ($typ:expr) => {
+        match $typ {
+            EventType::MouseButtonPressed => MouseButtonEvent,
+            _ => MouseButtonEvent,
+        }
+    };
+}
+pub struct EventDispatcher {
+    event: Box<&'static dyn Event>,
+}
+
+impl EventDispatcher {
+    pub fn from(event: Box<&'static dyn Event>) -> Self {
+        Self { event }
+    }
+
+    pub fn dispatch<I: Event + 'static>(&self, event_type: EventType, callback: impl Fn(&I)) {
+        if self.event.get_event_type() == event_type {
+            let event_any: &dyn Any = &self.event;
+            let event = match event_any.downcast_ref::<I>() {
+                Some(e) => e,
+                None => panic!(
+                    "Cannot downcast {:?} to desired type",
+                    &self.event.get_event_type()
+                ),
+            };
+            callback(event);
+        }
+    }
+}
