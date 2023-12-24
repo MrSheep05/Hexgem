@@ -1,8 +1,13 @@
-use winit::keyboard::{KeyLocation, PhysicalKey};
+use winit::{
+    event_loop::EventLoopWindowTarget,
+    keyboard::{KeyLocation, PhysicalKey},
+};
+
+use crate::toAnyImpl;
 
 use super::event_new::{Event, EventCategory};
 
-pub struct KeyEvent {
+pub struct KeyboardEvent {
     pressed: bool,
     handled: bool,
     pub key: PhysicalKey,
@@ -10,7 +15,7 @@ pub struct KeyEvent {
     pub repeat: bool,
 }
 
-impl KeyEvent {
+impl KeyboardEvent {
     pub fn create(pressed: bool, key: PhysicalKey, location: KeyLocation, repeat: bool) -> Self {
         Self {
             key,
@@ -21,7 +26,8 @@ impl KeyEvent {
         }
     }
 }
-impl Event for KeyEvent {
+toAnyImpl!(KeyboardEvent);
+impl Event for KeyboardEvent {
     fn handled(&mut self) -> &mut bool {
         &mut self.handled
     }
@@ -36,5 +42,9 @@ impl Event for KeyEvent {
 
     fn get_category(&self) -> super::event_new::CategoryBitFlag {
         EventCategory::Keyboard | EventCategory::Input
+    }
+
+    fn is_handled(&self) -> bool {
+        self.handled
     }
 }

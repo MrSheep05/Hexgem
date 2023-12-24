@@ -1,40 +1,45 @@
-use std::any::Any;
+use winit::{
+    dpi::{PhysicalPosition, PhysicalSize},
+    event_loop::EventLoopWindowTarget,
+};
 
-use winit::dpi::{PhysicalPosition, PhysicalSize};
-
-use crate::eventImpl;
+use crate::{eventImpl, toAnyImpl};
 
 use super::event_new::{Event, EventCategory, EventType};
 
 pub struct WindowFocusEvent {
-    lost_focus: bool,
+    is_focused: bool,
     handled: bool,
 }
 
 impl WindowFocusEvent {
-    pub fn create(lost_focus: bool) -> Self {
+    pub fn create(is_focused: bool) -> Self {
         Self {
-            lost_focus,
+            is_focused,
             handled: false,
         }
     }
 }
-
+toAnyImpl!(WindowFocusEvent);
 impl Event for WindowFocusEvent {
     fn handled(&mut self) -> &mut bool {
         &mut self.handled
     }
 
     fn get_event_type(&self) -> EventType {
-        if (self.lost_focus) {
-            EventType::WindowLostFocus
-        } else {
+        if self.is_focused {
             EventType::WindowFocus
+        } else {
+            EventType::WindowLostFocus
         }
     }
 
     fn get_category(&self) -> super::event_new::CategoryBitFlag {
         EventCategory::Application
+    }
+
+    fn is_handled(&self) -> bool {
+        self.handled
     }
 }
 

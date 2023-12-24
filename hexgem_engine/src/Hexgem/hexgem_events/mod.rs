@@ -15,6 +15,7 @@ pub use events::*;
 pub mod EventsNew {
     pub use super::application_event_new::*;
     pub use super::event_new::*;
+    pub use super::key_event_new::*;
     pub use super::mouse_event_new::*;
 }
 pub mod HexgemEvents {

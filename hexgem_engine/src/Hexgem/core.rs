@@ -1,3 +1,25 @@
+pub trait ToAny: 'static {
+    fn as_any(&self) -> &dyn std::any::Any;
+}
+
+#[macro_export]
+macro_rules! toAnyImpl {
+    ($struct:ident) => {
+        impl crate::Hexgem::core::ToAny for $struct {
+            fn as_any(&self) -> &dyn std::any::Any {
+                self
+            }
+        }
+    };
+    ($struct:ident,$lt:lifetime) => {
+        impl<$lt> crate::Hexgem::core::ToAny for $struct<$lt> {
+            fn as_any(&self) -> &dyn std::any::Any {
+                self
+            }
+        }
+    };
+}
+
 pub const fn bit(i: u8) -> u32 {
     return 1 << i;
 }

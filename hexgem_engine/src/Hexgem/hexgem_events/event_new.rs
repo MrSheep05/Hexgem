@@ -1,5 +1,9 @@
-use crate::{bitOperations, EventsNew::MouseButtonEvent, Hexgem::core::bit};
-use std::{any::Any, rc::Rc};
+use winit::event_loop::EventLoopWindowTarget;
+
+use crate::{
+    bitOperations,
+    Hexgem::core::{bit, ToAny},
+};
 pub struct CategoryBitFlag(u32);
 bitOperations!(CategoryBitFlag);
 
@@ -35,13 +39,11 @@ impl EventCategory {
     pub const MouseButton: CategoryBitFlag = BIT(4);
 }
 
-pub trait Event {
+pub trait Event: ToAny {
     fn handled(&mut self) -> &mut bool;
     fn get_event_type(&self) -> EventType;
     fn get_category(&self) -> CategoryBitFlag;
-    fn handle(&mut self) {
-        *self.handled() = true;
-    }
+    fn is_handled(&self) -> bool;
     fn is_in_category(&self, category: CategoryBitFlag) -> bool {
         return (self.get_category() & category).0 != 0;
     }
@@ -50,6 +52,7 @@ pub trait Event {
 #[macro_export]
 macro_rules! eventImpl {
     ($event:ident,$event_type:ident,$category:expr) => {
+        crate::toAnyImpl!($event);
         impl Event for $event {
             fn handled(&mut self) -> &mut bool {
                 &mut self.handled
@@ -61,6 +64,10 @@ macro_rules! eventImpl {
 
             fn get_category(&self) -> super::event_new::CategoryBitFlag {
                 $category
+            }
+
+            fn is_handled(&self) -> bool {
+                self.handled
             }
         }
     };
@@ -76,34 +83,34 @@ impl NoneEvent {
     }
 }
 eventImpl!(NoneEvent, None, EventCategory::None);
-macro_rules! eventType {
-    ($typ:expr) => {
-        match $typ {
-            EventType::MouseButtonPressed => MouseButtonEvent,
-            _ => MouseButtonEvent,
-        }
-    };
-}
-pub struct EventDispatcher {
-    event: Box<&'static dyn Event>,
+
+pub struct EventDispatcher<'a> {
+    elwt: &'a EventLoopWindowTarget<()>,
+    event: &'a mut Box<dyn Event>,
 }
 
-impl EventDispatcher {
-    pub fn from(event: Box<&'static dyn Event>) -> Self {
-        Self { event }
+impl<'a> EventDispatcher<'a> {
+    pub fn from(event: &'a mut Box<dyn Event>, elwt: &'a EventLoopWindowTarget<()>) -> Self {
+        Self { event, elwt }
     }
 
-    pub fn dispatch<I: Event + 'static>(&self, event_type: EventType, callback: impl Fn(&I)) {
-        if self.event.get_event_type() == event_type {
-            let event_any: &dyn Any = &self.event;
+    pub fn dispatch<I: Event + 'static, F>(&self, event_type: EventType, mut callback: F) -> bool
+    where
+        F: FnMut(&I) -> Option<bool>,
+    {
+        if &self.event.get_event_type() == &event_type {
+            let event_any = &self.event.as_any();
             let event = match event_any.downcast_ref::<I>() {
                 Some(e) => e,
-                None => panic!(
-                    "Cannot downcast {:?} to desired type",
-                    &self.event.get_event_type()
-                ),
+                None => panic!("Cannot downcast event to desired type"),
             };
-            callback(event);
+            let opt = callback(event);
+            return opt.map_or(true, |result| result);
         }
+        return false;
+    }
+
+    pub fn close(&self) {
+        self.elwt.exit();
     }
 }

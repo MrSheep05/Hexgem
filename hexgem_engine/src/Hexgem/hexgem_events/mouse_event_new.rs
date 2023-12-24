@@ -1,11 +1,9 @@
-use crate::eventImpl;
-use std::any::Any;
+use super::event_new::{Event, EventCategory, EventType};
+use crate::{eventImpl, toAnyImpl};
 use winit::{
     dpi::PhysicalPosition,
     event::{MouseButton, MouseScrollDelta, TouchPhase},
 };
-
-use super::event_new::{Event, EventCategory, EventType};
 
 pub struct MouseButtonEvent {
     pressed: bool,
@@ -23,6 +21,7 @@ impl MouseButtonEvent {
     }
 }
 
+toAnyImpl!(MouseButtonEvent);
 impl Event for MouseButtonEvent {
     fn handled(&mut self) -> &mut bool {
         &mut self.handled
@@ -38,6 +37,10 @@ impl Event for MouseButtonEvent {
 
     fn get_category(&self) -> super::event_new::CategoryBitFlag {
         EventCategory::Mouse | EventCategory::MouseButton | EventCategory::Input
+    }
+
+    fn is_handled(&self) -> bool {
+        self.handled
     }
 }
 

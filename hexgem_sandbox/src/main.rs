@@ -1,9 +1,17 @@
-use hexgem_engine::{App, HexgemApp, HexgemLogger};
-use sandbox::Sandbox;
+use hexgem_engine::{
+    HexgemLogger,
+    NewHexgem::{Application, HexgemApp},
+};
 
-mod sandbox;
+struct Sandbox {}
+
+impl HexgemApp for Sandbox {
+    fn application() -> Application {
+        Application::create()
+    }
+}
 fn main() {
     HexgemLogger::init().expect("Error occured on init logger");
-    let sandbox = Sandbox::create_application();
-    sandbox.run(&sandbox.application);
+    let sandbox = Sandbox {};
+    sandbox.run();
 }
