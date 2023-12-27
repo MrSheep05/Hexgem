@@ -2,9 +2,9 @@
 
 This project is mine attempt at creating game engine in rust. I am making this stuff with help of [Cherno`s tutorials](https://www.youtube.com/watch?v=JxIZbV_XjAs&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT). If you want to share your knowledge or opinion on this project feel free to write me upon Discord _nick: mrsh33p_.
 
-# Hexgem API
+# Hexgem API [Deprecated]
 
-To start a window you need to implement HexgemApp trait. This will ensure that your struct can handle main features of this package. HexgemApp so far requires you to implement twwo more traits.
+To start a window you need to implement HexgemApp trait. This will ensure that your struct can handle main features of this package. HexgemApp so far requires you to implement two more traits.
 
 ## Implementing App trait
 
