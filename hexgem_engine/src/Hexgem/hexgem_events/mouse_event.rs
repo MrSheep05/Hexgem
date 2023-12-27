@@ -1,4 +1,4 @@
-use super::event_new::{Event, EventCategory, EventType};
+use super::event::{Event, EventCategory, EventType};
 use crate::{eventImpl, toAnyImpl};
 use winit::{
     dpi::PhysicalPosition,
@@ -35,7 +35,7 @@ impl Event for MouseButtonEvent {
         }
     }
 
-    fn get_category(&self) -> super::event_new::CategoryBitFlag {
+    fn get_category(&self) -> super::event::CategoryBitFlag {
         EventCategory::Mouse | EventCategory::MouseButton | EventCategory::Input
     }
 

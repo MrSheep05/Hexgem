@@ -5,7 +5,7 @@ use winit::{
 };
 
 use crate::{
-    EventsNew::{
+    HexgemEvent::{
         Event, KeyboardEvent, MouseButtonEvent, MouseMoveEvent, MouseScrollEvent, NoneEvent,
         WindowCloseEvent, WindowFocusEvent, WindowMoveEvent, WindowResizeEvent,
     },

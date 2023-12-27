@@ -62,7 +62,7 @@ macro_rules! eventImpl {
                 EventType::$event_type
             }
 
-            fn get_category(&self) -> super::event_new::CategoryBitFlag {
+            fn get_category(&self) -> super::event::CategoryBitFlag {
                 $category
             }
 

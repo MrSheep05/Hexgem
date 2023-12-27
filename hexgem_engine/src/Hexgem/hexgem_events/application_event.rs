@@ -5,7 +5,7 @@ use winit::{
 
 use crate::{eventImpl, toAnyImpl};
 
-use super::event_new::{Event, EventCategory, EventType};
+use super::event::{Event, EventCategory, EventType};
 
 pub struct WindowFocusEvent {
     is_focused: bool,
@@ -34,7 +34,7 @@ impl Event for WindowFocusEvent {
         }
     }
 
-    fn get_category(&self) -> super::event_new::CategoryBitFlag {
+    fn get_category(&self) -> super::event::CategoryBitFlag {
         EventCategory::Application
     }
 

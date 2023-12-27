@@ -3,12 +3,12 @@ use super::layer::Layer;
 type LayerList = Vec<Box<dyn Layer>>;
 type LayerIterator<'a> = Vec<&'a Box<dyn Layer>>;
 
-pub struct LayarStack {
+pub struct LayerStack {
     overlayers: LayerList,
     layers: LayerList,
 }
 
-impl LayarStack {
+impl LayerStack {
     pub fn create() -> Self {
         Self {
             overlayers: vec![],

@@ -1,6 +1,6 @@
 use log::info;
 
-use crate::HexgemEvent;
+use crate::HexgemEvent::Event;
 
 pub trait Layer {
     fn get_name(&self) -> &'static str;
@@ -13,5 +13,5 @@ pub trait Layer {
     fn on_update(&self) {
         info!("Called update on {} layer", self.get_name());
     }
-    fn on_event(&self, event: &HexgemEvent) {}
+    fn on_event(&self, event: &mut Box<dyn Event>);
 }

@@ -5,7 +5,7 @@ use winit::{
 
 use crate::toAnyImpl;
 
-use super::event_new::{Event, EventCategory};
+use super::event::{Event, EventCategory};
 
 pub struct KeyboardEvent {
     pressed: bool,
@@ -32,15 +32,15 @@ impl Event for KeyboardEvent {
         &mut self.handled
     }
 
-    fn get_event_type(&self) -> super::event_new::EventType {
+    fn get_event_type(&self) -> super::event::EventType {
         if self.pressed {
-            super::event_new::EventType::KeyPressed
+            super::event::EventType::KeyPressed
         } else {
-            super::event_new::EventType::KeyReleased
+            super::event::EventType::KeyReleased
         }
     }
 
-    fn get_category(&self) -> super::event_new::CategoryBitFlag {
+    fn get_category(&self) -> super::event::CategoryBitFlag {
         EventCategory::Keyboard | EventCategory::Input
     }
 
