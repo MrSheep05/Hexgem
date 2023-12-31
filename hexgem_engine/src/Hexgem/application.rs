@@ -7,8 +7,13 @@ use super::{layer::Layer, layer_stack::LayerStack, window::Window};
 
 pub trait HexgemApp: Sized {
     fn application() -> Application;
-    fn run(&self) {
-        Self::application().run(self);
+    fn run<T>(&self, mut callback: T)
+    where
+        T: FnMut(&mut Application),
+    {
+        let mut application = Self::application();
+        callback(&mut application);
+        application.run(self);
     }
 }
 pub struct Application {
@@ -46,7 +51,7 @@ impl Application {
         let mut handle_vector: Vec<bool> = vec![];
 
         {
-            let event_dispatcher = EventDispatcher::from(&mut event, elwt);
+            let event_dispatcher = EventDispatcher::from(&mut event, Some(elwt));
             handle_vector.push(event_dispatcher.dispatch::<MouseButtonEvent, _>(
                 EventType::MouseButtonPressed,
                 |e| {
@@ -77,6 +82,9 @@ impl Application {
         info!("Running app");
         self.window.take().map(|w| {
             w.open(|event, elwt| {
+                for layer in self.layer_stack.layers() {
+                    layer.on_update();
+                }
                 self.on_event(event, elwt);
             })
         });

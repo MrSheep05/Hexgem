@@ -11,13 +11,6 @@ macro_rules! toAnyImpl {
             }
         }
     };
-    ($struct:ident,$lt:lifetime) => {
-        impl<$lt> crate::Hexgem::core::ToAny for $struct<$lt> {
-            fn as_any(&self) -> &dyn std::any::Any {
-                self
-            }
-        }
-    };
 }
 
 pub const fn bit(i: u8) -> u32 {

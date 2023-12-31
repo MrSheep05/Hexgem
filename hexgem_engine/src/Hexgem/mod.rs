@@ -8,7 +8,6 @@ mod log;
 mod window;
 pub use self::log::*;
 pub use ::log::{debug, error, info, warn};
+pub use application::*;
 pub use hexgem_events::*;
-pub mod NewHexgem {
-    pub use super::application::*;
-}
+pub use layer::*;

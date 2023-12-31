@@ -1,3 +1,5 @@
+use std::any::type_name;
+
 use winit::event_loop::EventLoopWindowTarget;
 
 use crate::{
@@ -85,12 +87,15 @@ impl NoneEvent {
 eventImpl!(NoneEvent, None, EventCategory::None);
 
 pub struct EventDispatcher<'a> {
-    elwt: &'a EventLoopWindowTarget<()>,
+    elwt: Option<&'a EventLoopWindowTarget<()>>,
     event: &'a mut Box<dyn Event>,
 }
 
 impl<'a> EventDispatcher<'a> {
-    pub fn from(event: &'a mut Box<dyn Event>, elwt: &'a EventLoopWindowTarget<()>) -> Self {
+    pub fn from(
+        event: &'a mut Box<dyn Event>,
+        elwt: Option<&'a EventLoopWindowTarget<()>>,
+    ) -> Self {
         Self { event, elwt }
     }
 
@@ -102,7 +107,11 @@ impl<'a> EventDispatcher<'a> {
             let event_any = &self.event.as_any();
             let event = match event_any.downcast_ref::<I>() {
                 Some(e) => e,
-                None => panic!("Cannot downcast event to desired type"),
+                None => panic!(
+                    "Cannot downcast {:?} event to desired {} type",
+                    event_type,
+                    type_name::<I>()
+                ),
             };
             let opt = callback(event);
             return opt.map_or(true, |result| result);
@@ -111,6 +120,6 @@ impl<'a> EventDispatcher<'a> {
     }
 
     pub fn close(&self) {
-        self.elwt.exit();
+        self.elwt.map(|f| f.exit());
     }
 }

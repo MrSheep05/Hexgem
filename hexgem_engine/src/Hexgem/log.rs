@@ -1,6 +1,9 @@
 use crate::Hexgem::level::ColorLog;
 use log::*;
-use std::{panic, path::Path};
+use std::{
+    panic::{self, Location},
+    path::Path,
+};
 
 pub struct HexgemLogger;
 
@@ -58,16 +61,28 @@ impl HexgemLogger {
     pub fn init() -> Result<(), SetLoggerError> {
         panic::set_hook({
             Box::new(move |info| {
-                if let Some(mess) = info.payload().downcast_ref::<&str>() {
-                    match info.location() {
-                        Some(location) => error!(target: &location.to_string(), "{}", mess),
-                        None => error!("{}", mess),
-                    };
-                }
+                let location = info.location();
+                let content = {
+                    if let Some(mess) = info.payload().downcast_ref::<&str>() {
+                        mess
+                    } else if let Some(mess) = info.payload().downcast_ref::<String>() {
+                        mess
+                    } else {
+                        "Panic occured!"
+                    }
+                };
+                Self::log(content, location);
             })
         });
         println!("\x1bc");
         log::set_logger(&HexgemLogger).map(|()| log::set_max_level(LevelFilter::Debug))
+    }
+
+    fn log(content: &str, location: Option<&Location<'_>>) {
+        match location {
+            Some(location) => error!(target: &location.to_string(), "{}", content),
+            None => error!("{}", content),
+        };
     }
 }
 trait ClientGet {
