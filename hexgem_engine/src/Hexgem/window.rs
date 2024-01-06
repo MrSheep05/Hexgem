@@ -1,103 +1,65 @@
-use winit::{
-    event::{ElementState, KeyEvent},
-    event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
-    window::WindowBuilder,
+use glfw::{flush_messages, WindowEvent};
+
+use crate::HexgemEvent::{
+    Event, KeyboardEvent, MouseButtonEvent, MouseMoveEvent, MouseScrollEvent, NoneEvent,
+    WindowCloseEvent, WindowFocusEvent, WindowMoveEvent, WindowResizeEvent,
 };
 
-use crate::{
-    HexgemEvent::{
-        Event, KeyboardEvent, MouseButtonEvent, MouseMoveEvent, MouseScrollEvent, NoneEvent,
-        WindowCloseEvent, WindowFocusEvent, WindowMoveEvent, WindowResizeEvent,
-    },
-    Unwrap,
-};
+use super::core::{Position, Size};
 
-type InnerWindow = winit::window::Window;
-
-pub struct Window {
-    window: InnerWindow,
-    event_loop: EventLoop<()>,
+pub struct WindowProps {
+    pub title: &'static str,
+    pub width: u32,
+    pub height: u32,
 }
 
-impl Window {
-    pub fn create(title: &str) -> Self {
-        let event_loop = EventLoop::new().get("Cannot create new event loop");
-        event_loop.set_control_flow(ControlFlow::Poll);
-        let window = WindowBuilder::new()
-            .with_title(title)
-            .build(&event_loop)
-            .get("Cannot create new window");
-        Self { window, event_loop }
+impl Default for WindowProps {
+    fn default() -> Self {
+        Self {
+            title: "HexgemApp",
+            width: 1280,
+            height: 720,
+        }
     }
+}
 
-    pub fn open<F>(self, mut on_event: F)
+pub trait Window {
+    fn create(props: WindowProps) -> Box<dyn Window>
     where
-        F: FnMut(Box<dyn Event>, &EventLoopWindowTarget<()>),
-    {
-        self.event_loop
-            .run(|event, elwt| {
-                let event_model: Box<dyn Event> = match event {
-                    winit::event::Event::WindowEvent {
-                        event: window_event,
-                        ..
-                    } => match window_event {
-                        winit::event::WindowEvent::Resized(size) => {
-                            Box::new(WindowResizeEvent::create(size))
-                        }
-                        winit::event::WindowEvent::Moved(position) => {
-                            Box::new(WindowMoveEvent::create(position))
-                        }
-                        winit::event::WindowEvent::CloseRequested => {
-                            Box::new(WindowCloseEvent::create())
-                        }
-                        winit::event::WindowEvent::Focused(isFocused) => {
-                            Box::new(WindowFocusEvent::create(isFocused))
-                        }
-                        winit::event::WindowEvent::KeyboardInput {
-                            event: key_event, ..
-                        } => dispatch_key_event(key_event),
-                        winit::event::WindowEvent::CursorMoved { position, .. } => {
-                            Box::new(MouseMoveEvent::create(position))
-                        }
-                        winit::event::WindowEvent::MouseWheel { delta, phase, .. } => {
-                            Box::new(MouseScrollEvent::create(delta, phase))
-                        }
-                        winit::event::WindowEvent::MouseInput { state, button, .. } => {
-                            dispatch_mouse_input_event(state, button)
-                        }
-                        _ => Box::new(NoneEvent::create()),
-                    },
-                    _ => Box::new(NoneEvent::create()),
-                };
-                on_event(event_model, elwt);
-            })
-            .expect("Cannot run event_loop");
+        Self: Sized;
+    fn is_vsync(&self) -> bool;
+    fn get_width(&self) -> i32;
+    fn get_height(&self) -> i32;
+    fn on_update(&mut self, callback: &mut dyn FnMut(Box<dyn Event>));
+    fn set_vsync(&mut self, enabled: bool);
+    // fn event_callback(&self) -> &dyn FnMut(Box<dyn Event>);
+    // fn set_event_callback(&mut self, callback: Box<dyn FnMut(Box<dyn Event>)>);
+
+    fn get_event(&self, event: WindowEvent) -> Box<dyn Event> {
+        let hexgemEvent: Box<dyn Event> = match event {
+            WindowEvent::Pos(x, y) => Box::new(WindowMoveEvent::create(Position { x, y })),
+            WindowEvent::Size(width, height) => {
+                Box::new(WindowResizeEvent::create(Size { width, height }))
+            }
+            WindowEvent::Close => Box::new(WindowCloseEvent::create()),
+
+            // WindowEvent::Refresh => todo!(),
+            WindowEvent::Focus(is_focused) => Box::new(WindowFocusEvent::create(is_focused)),
+            WindowEvent::MouseButton(button, action, modifiers) => Box::new(match action {
+                glfw::Action::Release => MouseButtonEvent::create(false, false, button, modifiers),
+                glfw::Action::Press => MouseButtonEvent::create(true, false, button, modifiers),
+                glfw::Action::Repeat => MouseButtonEvent::create(true, true, button, modifiers),
+            }),
+            WindowEvent::CursorPos(x, y) => Box::new(MouseMoveEvent::create(Position { x, y })),
+            WindowEvent::Scroll(dx, dy) => Box::new(MouseScrollEvent::create(dx, dy)),
+            WindowEvent::Key(key, code, action, modifiers) => Box::new(match action {
+                glfw::Action::Release => KeyboardEvent::create(false, key, false, modifiers),
+                glfw::Action::Press => KeyboardEvent::create(true, key, false, modifiers),
+                glfw::Action::Repeat => KeyboardEvent::create(true, key, true, modifiers),
+            }),
+            // WindowEvent::Maximize(isFullSize) => todo!(),
+            _ => Box::new(NoneEvent::create()),
+        };
+        return hexgemEvent;
     }
-}
-
-fn dispatch_key_event(key_event: KeyEvent) -> Box<dyn Event> {
-    return Box::new(match key_event.state {
-        winit::event::ElementState::Pressed => KeyboardEvent::create(
-            true,
-            key_event.physical_key,
-            key_event.location,
-            key_event.repeat,
-        ),
-        winit::event::ElementState::Released => KeyboardEvent::create(
-            false,
-            key_event.physical_key,
-            key_event.location,
-            key_event.repeat,
-        ),
-    });
-}
-
-fn dispatch_mouse_input_event(
-    state: ElementState,
-    button: winit::event::MouseButton,
-) -> Box<dyn Event> {
-    return Box::new(match state {
-        ElementState::Pressed => MouseButtonEvent::create(true, button),
-        ElementState::Released => MouseButtonEvent::create(false, button),
-    });
 }

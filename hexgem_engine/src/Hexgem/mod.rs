@@ -5,6 +5,7 @@ mod layer;
 mod layer_stack;
 mod level;
 mod log;
+mod platform;
 mod window;
 pub use self::log::*;
 pub use ::log::{debug, error, info, warn};

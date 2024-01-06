@@ -1,8 +1,3 @@
-use winit::{
-    event_loop::EventLoopWindowTarget,
-    keyboard::{KeyLocation, PhysicalKey},
-};
-
 use crate::toAnyImpl;
 
 use super::event::{Event, EventCategory};
@@ -10,18 +5,19 @@ use super::event::{Event, EventCategory};
 pub struct KeyboardEvent {
     pressed: bool,
     handled: bool,
-    pub key: PhysicalKey,
-    pub location: KeyLocation,
+    pub key: glfw::Key,
+
     pub repeat: bool,
+    pub modifiers: glfw::Modifiers,
 }
 
 impl KeyboardEvent {
-    pub fn create(pressed: bool, key: PhysicalKey, location: KeyLocation, repeat: bool) -> Self {
+    pub fn create(pressed: bool, key: glfw::Key, repeat: bool, modifiers: glfw::Modifiers) -> Self {
         Self {
             key,
             repeat,
             pressed,
-            location,
+            modifiers,
             handled: false,
         }
     }

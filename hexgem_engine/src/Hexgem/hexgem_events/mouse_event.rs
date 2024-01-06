@@ -1,21 +1,26 @@
 use super::event::{Event, EventCategory, EventType};
-use crate::{eventImpl, toAnyImpl};
-use winit::{
-    dpi::PhysicalPosition,
-    event::{MouseButton, MouseScrollDelta, TouchPhase},
-};
+use crate::{eventImpl, toAnyImpl, Hexgem::core::Position};
 
 pub struct MouseButtonEvent {
     pressed: bool,
+    pub repeated: bool,
     handled: bool,
-    pub button: MouseButton,
+    pub modifiers: glfw::Modifiers,
+    pub button: glfw::MouseButton,
 }
 
 impl MouseButtonEvent {
-    pub fn create(pressed: bool, button: MouseButton) -> Self {
+    pub fn create(
+        pressed: bool,
+        repeated: bool,
+        button: glfw::MouseButton,
+        modifiers: glfw::Modifiers,
+    ) -> Self {
         Self {
             button,
             pressed,
+            repeated,
+            modifiers,
             handled: false,
         }
     }
@@ -46,15 +51,15 @@ impl Event for MouseButtonEvent {
 
 pub struct MouseScrollEvent {
     handled: bool,
-    pub scroll_delta: MouseScrollDelta,
-    pub phase: TouchPhase,
+    pub dx: f64,
+    pub dy: f64,
 }
 
 impl MouseScrollEvent {
-    pub fn create(scroll_delta: MouseScrollDelta, phase: TouchPhase) -> Self {
+    pub fn create(dx: f64, dy: f64) -> Self {
         Self {
-            phase,
-            scroll_delta,
+            dx,
+            dy,
             handled: false,
         }
     }
@@ -67,11 +72,11 @@ eventImpl!(
 
 pub struct MouseMoveEvent {
     handled: bool,
-    pub position: PhysicalPosition<f64>,
+    pub position: Position<f64>,
 }
 
 impl MouseMoveEvent {
-    pub fn create(position: PhysicalPosition<f64>) -> Self {
+    pub fn create(position: Position<f64>) -> Self {
         Self {
             position,
             handled: false,

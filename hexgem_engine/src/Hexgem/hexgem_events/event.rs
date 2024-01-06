@@ -1,7 +1,5 @@
 use std::any::type_name;
 
-use winit::event_loop::EventLoopWindowTarget;
-
 use crate::{
     bitOperations,
     Hexgem::core::{bit, ToAny},
@@ -87,16 +85,12 @@ impl NoneEvent {
 eventImpl!(NoneEvent, None, EventCategory::None);
 
 pub struct EventDispatcher<'a> {
-    elwt: Option<&'a EventLoopWindowTarget<()>>,
     event: &'a mut Box<dyn Event>,
 }
 
 impl<'a> EventDispatcher<'a> {
-    pub fn from(
-        event: &'a mut Box<dyn Event>,
-        elwt: Option<&'a EventLoopWindowTarget<()>>,
-    ) -> Self {
-        Self { event, elwt }
+    pub fn from(event: &'a mut Box<dyn Event>) -> Self {
+        Self { event }
     }
 
     pub fn dispatch<I: Event + 'static, F>(&self, event_type: EventType, mut callback: F) -> bool
@@ -117,9 +111,5 @@ impl<'a> EventDispatcher<'a> {
             return opt.map_or(true, |result| result);
         }
         return false;
-    }
-
-    pub fn close(&self) {
-        self.elwt.map(|f| f.exit());
     }
 }

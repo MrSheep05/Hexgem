@@ -2,6 +2,15 @@ pub trait ToAny: 'static {
     fn as_any(&self) -> &dyn std::any::Any;
 }
 
+pub struct Position<T> {
+    pub x: T,
+    pub y: T,
+}
+
+pub struct Size<T> {
+    pub width: T,
+    pub height: T,
+}
 #[macro_export]
 macro_rules! toAnyImpl {
     ($struct:ident) => {

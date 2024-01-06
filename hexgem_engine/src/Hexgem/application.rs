@@ -1,9 +1,15 @@
+use std::cell::RefCell;
+
 use log::{error, info, warn};
-use winit::{event, event_loop::EventLoopWindowTarget};
 
 use crate::HexgemEvent::{Event, EventDispatcher, EventType, MouseButtonEvent, WindowCloseEvent};
 
-use super::{layer::Layer, layer_stack::LayerStack, window::Window};
+use super::{
+    layer::Layer,
+    layer_stack::LayerStack,
+    platform::MacOSWindow,
+    window::{Window, WindowProps},
+};
 
 pub trait HexgemApp: Sized {
     fn application() -> Application;
@@ -17,19 +23,19 @@ pub trait HexgemApp: Sized {
     }
 }
 pub struct Application {
-    window: Option<Window>,
+    window: Option<Box<dyn Window>>,
     layer_stack: LayerStack,
     running: bool,
 }
 
 impl Application {
     pub fn create() -> Self {
-        let window = Window::create("TEST");
+        let window = Some(MacOSWindow::create(WindowProps::default()));
         let layer_stack = LayerStack::create();
         Self {
             layer_stack,
             running: true,
-            window: Some(window),
+            window,
         }
     }
 
@@ -47,46 +53,46 @@ impl Application {
         self.layer_stack.push_overlay(layer);
     }
 
-    fn on_event(&mut self, mut event: Box<dyn Event>, elwt: &EventLoopWindowTarget<()>) {
-        let mut handle_vector: Vec<bool> = vec![];
+    fn on_event(&mut self) -> impl FnMut(Box<dyn Event>) + '_ {
+        return |mut event: Box<dyn Event>| {
+            let mut handle_vector: Vec<bool> = vec![];
 
-        {
-            let event_dispatcher = EventDispatcher::from(&mut event, Some(elwt));
-            handle_vector.push(event_dispatcher.dispatch::<MouseButtonEvent, _>(
-                EventType::MouseButtonPressed,
-                |e| {
-                    info!("Click");
-                    None
-                },
-            ));
-            handle_vector.push(event_dispatcher.dispatch::<WindowCloseEvent, _>(
-                EventType::WindowClose,
-                |e| {
-                    warn!("CLOSE");
-                    event_dispatcher.close();
-                    None
-                },
-            ));
-        }
-        *event.handled() = handle_vector.contains(&true);
-        if event.is_handled() {
-            info!("HANDLED ${}", event.is_handled())
-        }
-        let layers = self.layer_stack.layers();
+            {
+                let event_dispatcher = EventDispatcher::from(&mut event);
+                handle_vector.push(event_dispatcher.dispatch::<MouseButtonEvent, _>(
+                    EventType::MouseButtonPressed,
+                    |e| {
+                        info!("Click");
+                        None
+                    },
+                ));
+                handle_vector.push(event_dispatcher.dispatch::<WindowCloseEvent, _>(
+                    EventType::WindowClose,
+                    |e| {
+                        warn!("CLOSE");
+                        self.running = false;
+                        None
+                    },
+                ));
+            }
+            *event.handled() = handle_vector.contains(&true);
+            if event.is_handled() {
+                info!("HANDLED ${}", event.is_handled())
+            }
+            let layers = self.layer_stack.layers();
 
-        for layer in layers.iter().rev() {
-            layer.on_event(&mut event);
-        }
+            for layer in layers.iter().rev() {
+                layer.on_event(&mut event);
+            }
+        };
     }
-    fn run(&mut self, app: &impl HexgemApp) {
-        info!("Running app");
-        self.window.take().map(|w| {
-            w.open(|event, elwt| {
-                for layer in self.layer_stack.layers() {
-                    layer.on_update();
-                }
-                self.on_event(event, elwt);
-            })
+
+    fn run(mut self, app: &impl HexgemApp) {
+        self.window.take().map(|mut window| {
+            while self.running {
+                let mut callback = self.on_event();
+                window.on_update(&mut callback);
+            }
         });
     }
 }

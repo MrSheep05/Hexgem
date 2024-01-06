@@ -21,9 +21,7 @@ impl Layer for ExampleLayer {
     }
 
     fn on_event(&self, event: &mut Box<dyn Event>) {
-        if event.get_event_type() != EventType::None {
-            info!("{:?}", event.get_event_type());
-        }
+        if event.get_event_type() != EventType::None {}
     }
 }
 fn main() {

@@ -1,9 +1,7 @@
-use winit::{
-    dpi::{PhysicalPosition, PhysicalSize},
-    event_loop::EventLoopWindowTarget,
+use crate::{
+    eventImpl, toAnyImpl,
+    Hexgem::core::{Position, Size},
 };
-
-use crate::{eventImpl, toAnyImpl};
 
 use super::event::{Event, EventCategory, EventType};
 
@@ -56,11 +54,11 @@ eventImpl!(WindowCloseEvent, WindowClose, EventCategory::Application);
 
 pub struct WindowResizeEvent {
     handled: bool,
-    pub size: PhysicalSize<u32>,
+    pub size: Size<i32>,
 }
 
 impl WindowResizeEvent {
-    pub fn create(size: PhysicalSize<u32>) -> Self {
+    pub fn create(size: Size<i32>) -> Self {
         Self {
             size,
             handled: false,
@@ -71,11 +69,11 @@ eventImpl!(WindowResizeEvent, WindowResize, EventCategory::Application);
 
 pub struct WindowMoveEvent {
     handled: bool,
-    pub position: PhysicalPosition<i32>,
+    pub position: Position<i32>,
 }
 
 impl WindowMoveEvent {
-    pub fn create(position: PhysicalPosition<i32>) -> Self {
+    pub fn create(position: Position<i32>) -> Self {
         Self {
             position,
             handled: false,
