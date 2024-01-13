@@ -1,8 +1,8 @@
-use std::cell::RefCell;
-
 use log::{error, info, warn};
 
-use crate::HexgemEvent::{Event, EventDispatcher, EventType, MouseButtonEvent, WindowCloseEvent};
+use crate::HexgemEvent::{
+    Event, EventDispatcher, EventType, MouseButtonEvent, MouseMoveEvent, WindowCloseEvent,
+};
 
 use super::{
     layer::Layer,
@@ -53,22 +53,30 @@ impl Application {
         self.layer_stack.push_overlay(layer);
     }
 
-    fn on_event(&mut self) -> impl FnMut(Box<dyn Event>) + '_ {
-        return |mut event: Box<dyn Event>| {
+    fn on_event(&mut self) -> impl FnMut(Box<dyn Event>, Box<&mut dyn Window>) + '_ {
+        return |mut event: Box<dyn Event>, window: Box<&mut dyn Window>| {
             let mut handle_vector: Vec<bool> = vec![];
 
             {
                 let event_dispatcher = EventDispatcher::from(&mut event);
-                handle_vector.push(event_dispatcher.dispatch::<MouseButtonEvent, _>(
-                    EventType::MouseButtonPressed,
-                    |e| {
-                        info!("Click");
-                        None
-                    },
-                ));
+
+                event_dispatcher.dispatch::<MouseMoveEvent, _>(EventType::MouseMoved, |e| {
+                    unsafe {
+                        let width = window.get_width() as f64;
+                        let height = window.get_height() as f64;
+                        let red = (e.position.x / width) as f32;
+                        let blue = (e.position.y / height) as f32;
+                        let green = (e.position.y.powi(2) + e.position.x.powi(2)).sqrt()
+                            / (width.powi(2) + height.powi(2)).sqrt();
+                        gl::ClearColor(red, green as f32, blue, 1.0);
+                        gl::Clear(gl::COLOR_BUFFER_BIT);
+                    }
+                    None
+                });
+
                 handle_vector.push(event_dispatcher.dispatch::<WindowCloseEvent, _>(
                     EventType::WindowClose,
-                    |e| {
+                    |_| {
                         warn!("CLOSE");
                         self.running = false;
                         None
@@ -87,12 +95,14 @@ impl Application {
         };
     }
 
-    fn run(mut self, app: &impl HexgemApp) {
+    fn run(&mut self, _app: &impl HexgemApp) {
+        info!("Running app");
         self.window.take().map(|mut window| {
             while self.running {
                 let mut callback = self.on_event();
                 window.on_update(&mut callback);
             }
+            self.window = Some(window);
         });
     }
 }

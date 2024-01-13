@@ -1,18 +1,17 @@
-use std::mem;
-
 use glfw::{Context, Glfw, GlfwReceiver, PWindow, WindowEvent};
 use log::{error, info};
+use std::mem;
 
 use crate::{
     Hexgem::window::Window,
-    HexgemEvent::{Event, EventType},
+    HexgemEvent::{Event, EventType, NoneEvent},
 };
 
 pub struct MacOSWindow {
     vsync_on: bool,
     glfw: Glfw,
     window: PWindow,
-    events: GlfwReceiver<(f64, WindowEvent)>,
+    events: Option<GlfwReceiver<(f64, WindowEvent)>>,
 }
 
 impl Window for MacOSWindow {
@@ -30,13 +29,16 @@ impl Window for MacOSWindow {
                 glfw::WindowMode::Windowed,
             )
             .expect("Failed to create GLFW window.");
+
         window.make_current();
+        gl::load_with(|s| glfw.get_proc_address_raw(s));
+
         window.set_all_polling(true);
         let mut os_window = Self {
             vsync_on: false,
             glfw,
             window,
-            events,
+            events: Some(events),
         };
         os_window.set_vsync(true);
         Box::new(os_window)
@@ -54,14 +56,21 @@ impl Window for MacOSWindow {
         self.window.get_size().1
     }
 
-    fn on_update(&mut self, mut callback: &mut dyn FnMut(Box<dyn Event>)) {
+    fn on_update(&mut self, mut callback: &mut dyn FnMut(Box<dyn Event>, Box<&mut dyn Window>)) {
         self.window.swap_buffers();
         self.glfw.poll_events();
-
-        for (_, event) in glfw::flush_messages(&self.events) {
-            let hexgem_event = self.get_event(event);
-            callback(hexgem_event);
-        }
+        let mut count = 0;
+        self.events.take().map(|events| {
+            for (_, event) in glfw::flush_messages(&events) {
+                count += 1;
+                let hexgem_event = self.get_event(Some(event));
+                callback(hexgem_event, Box::new(self));
+            }
+            if count == 0 {
+                callback(Box::new(NoneEvent::create()), Box::new(self));
+            }
+            self.events = Some(events);
+        });
     }
 
     fn set_vsync(&mut self, enabled: bool) {
