@@ -39,17 +39,19 @@ impl Application {
         }
     }
 
-    pub fn push_layer<T>(&mut self, layer: T)
+    pub fn push_layer<T>(&mut self, mut layer: T)
     where
         T: Layer + 'static,
     {
+        layer.on_attach();
         self.layer_stack.push_layer(layer);
     }
 
-    pub fn push_overlay<T>(&mut self, layer: T)
+    pub fn push_overlay<T>(&mut self, mut layer: T)
     where
         T: Layer + 'static,
     {
+        layer.on_attach();
         self.layer_stack.push_overlay(layer);
     }
 
@@ -84,13 +86,15 @@ impl Application {
                 ));
             }
             *event.handled() = handle_vector.contains(&true);
-            if event.is_handled() {
-                info!("HANDLED ${}", event.is_handled())
-            }
-            let layers = self.layer_stack.layers();
+            let mut layers = self.layer_stack.layers();
 
-            for layer in layers.iter().rev() {
-                layer.on_event(&mut event);
+            for layer in layers.iter_mut().rev() {
+                if event.is_handled() {
+                    info!("HANDLED ${}", event.is_handled());
+
+                    break;
+                }
+                layer.on_event(&mut event, *window);
             }
         };
     }
@@ -99,10 +103,26 @@ impl Application {
         info!("Running app");
         self.window.take().map(|mut window| {
             while self.running {
+                for layer in self.layer_stack.layers() {
+                    layer.on_update(&mut window);
+                }
                 let mut callback = self.on_event();
                 window.on_update(&mut callback);
             }
             self.window = Some(window);
+        });
+    }
+
+    pub fn get_window(&self) -> &Option<Box<dyn Window>> {
+        &self.window
+    }
+
+    pub fn get_mut_window<F>(&mut self, mut callback: F)
+    where
+        F: FnMut(Option<Box<&mut dyn Window>>),
+    {
+        self.window.take().map(|mut window| {
+            callback(Some(window.get_mut()));
         });
     }
 }

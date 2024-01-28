@@ -64,10 +64,10 @@ impl Window for MacOSWindow {
             for (_, event) in glfw::flush_messages(&events) {
                 count += 1;
                 let hexgem_event = self.get_event(Some(event));
-                callback(hexgem_event, Box::new(self));
+                callback(hexgem_event, self.get_mut());
             }
             if count == 0 {
-                callback(Box::new(NoneEvent::create()), Box::new(self));
+                callback(Box::new(NoneEvent::create()), self.get_mut());
             }
             self.events = Some(events);
         });
@@ -80,5 +80,17 @@ impl Window for MacOSWindow {
             self.glfw.set_swap_interval(glfw::SwapInterval::None);
         }
         self.vsync_on = enabled;
+    }
+
+    fn get_mut(&mut self) -> Box<&mut dyn Window> {
+        Box::new(self)
+    }
+
+    fn get_glfw(&self) -> &Glfw {
+        &self.glfw
+    }
+
+    fn get_window(&mut self) -> &mut glfw::PWindow {
+        &mut self.window
     }
 }

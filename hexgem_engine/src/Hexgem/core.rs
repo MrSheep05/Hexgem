@@ -2,6 +2,7 @@ pub trait ToAny: 'static {
     fn as_any(&self) -> &dyn std::any::Any;
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Position<T> {
     pub x: T,
     pub y: T,

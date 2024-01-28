@@ -1,4 +1,5 @@
-use glfw::{flush_messages, WindowEvent};
+use glfw::{flush_messages, Glfw, WindowEvent};
+use log::info;
 
 use crate::HexgemEvent::{
     Event, KeyboardEvent, MouseButtonEvent, MouseMoveEvent, MouseScrollEvent, NoneEvent,
@@ -30,6 +31,9 @@ pub trait Window {
     fn is_vsync(&self) -> bool;
     fn get_width(&self) -> i32;
     fn get_height(&self) -> i32;
+    fn get_mut(&mut self) -> Box<&mut dyn Window>;
+    fn get_glfw(&self) -> &Glfw;
+    fn get_window(&mut self) -> &mut glfw::PWindow;
     fn on_update(&mut self, callback: &mut dyn FnMut(Box<dyn Event>, Box<&mut dyn Window>));
     fn set_vsync(&mut self, enabled: bool);
     // fn event_callback(&self) -> &dyn FnMut(Box<dyn Event>);
