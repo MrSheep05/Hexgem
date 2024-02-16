@@ -2,7 +2,7 @@ use super::event::{Event, EventCategory, EventType};
 use crate::{eventImpl, toAnyImpl, Hexgem::core::Position};
 
 pub struct MouseButtonEvent {
-    pressed: bool,
+    pub pressed: bool,
     pub repeated: bool,
     handled: bool,
     pub modifiers: glfw::Modifiers,

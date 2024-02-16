@@ -1,14 +1,14 @@
 mod application;
 mod core;
+mod egui;
 mod hexgem_events;
-mod imgui;
 mod layer;
 mod layer_stack;
 mod level;
 mod log;
 mod platform;
 mod window;
-pub use self::imgui::*;
+pub use self::egui::*;
 pub use self::log::*;
 pub use ::log::{debug, error, info, warn};
 pub use application::*;
