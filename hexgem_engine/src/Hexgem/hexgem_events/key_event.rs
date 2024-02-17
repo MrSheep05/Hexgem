@@ -3,10 +3,9 @@ use crate::toAnyImpl;
 use super::event::{Event, EventCategory};
 
 pub struct KeyboardEvent {
-    pressed: bool,
+    pub pressed: bool,
     handled: bool,
     pub key: glfw::Key,
-
     pub repeat: bool,
     pub modifiers: glfw::Modifiers,
 }

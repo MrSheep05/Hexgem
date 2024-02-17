@@ -1,7 +1,7 @@
 use hexgem_engine::{
-    info, Application, HexgemApp,
-    HexgemEvent::{Event, EventDispatcher, EventType},
-    HexgemLogger, ImGuiLayer, Layer, Window,
+    info, Application, EguiLayer, HexgemApp,
+    HexgemEvent::{Event, EventType},
+    HexgemLogger, Layer, Window,
 };
 
 struct Sandbox {}
@@ -30,16 +30,12 @@ fn main() {
     sandbox.run(|app| {
         let layer = ExampleLayer { name: "TEST" };
         let glfw = app.get_window().as_ref().map(|w| w.get_glfw());
-        if let Some(gl) = glfw {
-            let imgui_layer = ImGuiLayer::new(|s| gl.get_proc_address_raw(s));
+
+        app.window.take().map(|mut w| {
+            let imgui_layer = EguiLayer::create(w.get_window());
             app.push_overlay(imgui_layer);
-        }
-        // app.window.take().map(|mut w| {
-        //     let imgui_layer = ImGuiLayer::new(|s| w.get_window().get_proc_address(s));
-        //     app.push_overlay(imgui_layer);
-        //     app.window = Some(w);
-        // });
+            app.window = Some(w);
+        });
         app.push_layer(layer);
-        // app.push_overlay(layer) Push ImGuiLayer TODO
     });
 }

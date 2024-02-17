@@ -23,7 +23,7 @@ pub trait HexgemApp: Sized {
     }
 }
 pub struct Application {
-    window: Option<Box<dyn Window>>,
+    pub window: Option<Box<dyn Window>>,
     layer_stack: LayerStack,
     running: bool,
 }
@@ -62,19 +62,19 @@ impl Application {
             {
                 let event_dispatcher = EventDispatcher::from(&mut event);
 
-                event_dispatcher.dispatch::<MouseMoveEvent, _>(EventType::MouseMoved, |e| {
-                    unsafe {
-                        let width = window.get_width() as f64;
-                        let height = window.get_height() as f64;
-                        let red = (e.position.x / width) as f32;
-                        let blue = (e.position.y / height) as f32;
-                        let green = (e.position.y.powi(2) + e.position.x.powi(2)).sqrt()
-                            / (width.powi(2) + height.powi(2)).sqrt();
-                        gl::ClearColor(red, green as f32, blue, 1.0);
-                        gl::Clear(gl::COLOR_BUFFER_BIT);
-                    }
-                    None
-                });
+                // event_dispatcher.dispatch::<MouseMoveEvent, _>(EventType::MouseMoved, |e| {
+                //     unsafe {
+                //         let width = window.get_width() as f64;
+                //         let height = window.get_height() as f64;
+                //         let red = (e.position.x / width) as f32;
+                //         let blue = (e.position.y / height) as f32;
+                //         let green = (e.position.y.powi(2) + e.position.x.powi(2)).sqrt()
+                //             / (width.powi(2) + height.powi(2)).sqrt();
+                // gl::ClearColor(red, green as f32, blue, 1.0);
+                // gl::Clear(gl::COLOR_BUFFER_BIT);
+                //     }
+                //     None
+                // });
 
                 handle_vector.push(event_dispatcher.dispatch::<WindowCloseEvent, _>(
                     EventType::WindowClose,
@@ -123,6 +123,7 @@ impl Application {
     {
         self.window.take().map(|mut window| {
             callback(Some(window.get_mut()));
+            self.window = Some(window);
         });
     }
 }

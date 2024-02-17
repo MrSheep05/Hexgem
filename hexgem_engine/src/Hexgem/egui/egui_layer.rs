@@ -24,6 +24,7 @@ impl Layer for EguiLayer {
         event: &mut Box<dyn crate::HexgemEvent::Event>,
         window: &mut dyn crate::Window,
     ) {
+        self.egui_window.context.handle_event(event);
     }
 
     fn on_update(&mut self, window: &mut Box<dyn crate::Window>) {

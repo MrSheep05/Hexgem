@@ -21,6 +21,11 @@ impl Window for MacOSWindow {
         let mut glfw =
             glfw::init(|err, description| error!("Error occured on glfw init - {}", description))
                 .expect("Could not init glfw!");
+        glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
+        glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
+        glfw.window_hint(glfw::WindowHint::OpenGlProfile(
+            glfw::OpenGlProfileHint::Core,
+        ));
         let (mut window, events) = glfw
             .create_window(
                 props.width,
@@ -29,10 +34,8 @@ impl Window for MacOSWindow {
                 glfw::WindowMode::Windowed,
             )
             .expect("Failed to create GLFW window.");
-
         window.make_current();
         gl::load_with(|s| glfw.get_proc_address_raw(s));
-
         window.set_all_polling(true);
         let mut os_window = Self {
             vsync_on: false,
@@ -60,6 +63,10 @@ impl Window for MacOSWindow {
         self.window.swap_buffers();
         self.glfw.poll_events();
         let mut count = 0;
+        unsafe {
+            gl::ClearColor(0.13, 0.15, 0.18, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
         self.events.take().map(|events| {
             for (_, event) in glfw::flush_messages(&events) {
                 count += 1;
