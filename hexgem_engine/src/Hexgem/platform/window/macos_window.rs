@@ -3,8 +3,15 @@ use log::{error, info};
 use std::mem;
 
 use crate::{
-    Hexgem::window::Window,
-    HexgemEvent::{Event, EventType, NoneEvent},
+    Hexgem::{
+        core::{Position, Size},
+        window::Window,
+    },
+    HexgemEvent::{
+        Event, EventType, Key, KeyboardEvent, Modifiers, MouseButton, MouseButtonEvent,
+        MouseMoveEvent, MouseScrollEvent, NoneEvent, WindowCloseEvent, WindowFocusEvent,
+        WindowMoveEvent, WindowResizeEvent,
+    },
 };
 
 pub struct MacOSWindow {
@@ -12,6 +19,70 @@ pub struct MacOSWindow {
     glfw: Glfw,
     window: PWindow,
     events: Option<GlfwReceiver<(f64, WindowEvent)>>,
+}
+
+impl MacOSWindow {
+    fn get_event(event: Option<WindowEvent>) -> Box<dyn Event> {
+        let hexgemEvent: Box<dyn Event> = if let Some(event_some) = event {
+            match event_some {
+                WindowEvent::Pos(x, y) => Box::new(WindowMoveEvent::create(Position { x, y })),
+                WindowEvent::Size(width, height) => {
+                    Box::new(WindowResizeEvent::create(Size { width, height }))
+                }
+                WindowEvent::Close => Box::new(WindowCloseEvent::create()),
+
+                // WindowEvent::Refresh => todo!(),
+                WindowEvent::Focus(is_focused) => Box::new(WindowFocusEvent::create(is_focused)),
+                WindowEvent::MouseButton(button, action, modifiers) => Box::new(match action {
+                    glfw::Action::Release => MouseButtonEvent::create(
+                        false,
+                        false,
+                        MouseButton::from(button),
+                        Modifiers::from(modifiers),
+                    ),
+                    glfw::Action::Press => MouseButtonEvent::create(
+                        true,
+                        false,
+                        MouseButton::from(button),
+                        Modifiers::from(modifiers),
+                    ),
+                    glfw::Action::Repeat => MouseButtonEvent::create(
+                        true,
+                        true,
+                        MouseButton::from(button),
+                        Modifiers::from(modifiers),
+                    ),
+                }),
+                WindowEvent::CursorPos(x, y) => Box::new(MouseMoveEvent::create(Position { x, y })),
+                WindowEvent::Scroll(dx, dy) => Box::new(MouseScrollEvent::create(dx, dy)),
+                WindowEvent::Key(key, code, action, modifiers) => Box::new(match action {
+                    glfw::Action::Release => KeyboardEvent::create(
+                        false,
+                        Key::from(key),
+                        false,
+                        Modifiers::from(modifiers),
+                    ),
+                    glfw::Action::Press => KeyboardEvent::create(
+                        true,
+                        Key::from(key),
+                        false,
+                        Modifiers::from(modifiers),
+                    ),
+                    glfw::Action::Repeat => KeyboardEvent::create(
+                        true,
+                        Key::from(key),
+                        true,
+                        Modifiers::from(modifiers),
+                    ),
+                }),
+                // WindowEvent::Maximize(isFullSize) => todo!(),
+                _ => Box::new(NoneEvent::create()),
+            }
+        } else {
+            Box::new(NoneEvent::create())
+        };
+        return hexgemEvent;
+    }
 }
 
 impl Window for MacOSWindow {
@@ -70,7 +141,7 @@ impl Window for MacOSWindow {
         self.events.take().map(|events| {
             for (_, event) in glfw::flush_messages(&events) {
                 count += 1;
-                let hexgem_event = self.get_event(Some(event));
+                let hexgem_event = Self::get_event(Some(event));
                 callback(hexgem_event, self.get_mut());
             }
             if count == 0 {
@@ -92,11 +163,13 @@ impl Window for MacOSWindow {
     fn get_mut(&mut self) -> Box<&mut dyn Window> {
         Box::new(self)
     }
+    #[cfg(not(target_os = "macos"))]
 
     fn get_glfw(&self) -> &Glfw {
         &self.glfw
     }
 
+    #[cfg(not(target_os = "macos"))]
     fn get_window(&mut self) -> &mut glfw::PWindow {
         &mut self.window
     }

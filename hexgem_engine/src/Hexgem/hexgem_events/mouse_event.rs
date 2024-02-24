@@ -1,20 +1,24 @@
 use super::event::{Event, EventCategory, EventType};
-use crate::{eventImpl, toAnyImpl, Hexgem::core::Position};
+use crate::{
+    eventImpl, toAnyImpl,
+    Hexgem::core::Position,
+    HexgemEvent::{Modifiers, MouseButton},
+};
 
 pub struct MouseButtonEvent {
     pub pressed: bool,
     pub repeated: bool,
     handled: bool,
-    pub modifiers: glfw::Modifiers,
-    pub button: glfw::MouseButton,
+    pub modifiers: Modifiers,
+    pub button: MouseButton,
 }
 
 impl MouseButtonEvent {
     pub fn create(
         pressed: bool,
         repeated: bool,
-        button: glfw::MouseButton,
-        modifiers: glfw::Modifiers,
+        button: MouseButton,
+        modifiers: Modifiers,
     ) -> Self {
         Self {
             button,

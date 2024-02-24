@@ -1,17 +1,20 @@
-use crate::toAnyImpl;
+use crate::{
+    toAnyImpl,
+    HexgemEvent::{Key, Modifiers},
+};
 
 use super::event::{Event, EventCategory};
 
 pub struct KeyboardEvent {
     pub pressed: bool,
     handled: bool,
-    pub key: glfw::Key,
+    pub key: Key,
     pub repeat: bool,
-    pub modifiers: glfw::Modifiers,
+    pub modifiers: Modifiers,
 }
 
 impl KeyboardEvent {
-    pub fn create(pressed: bool, key: glfw::Key, repeat: bool, modifiers: glfw::Modifiers) -> Self {
+    pub fn create(pressed: bool, key: Key, repeat: bool, modifiers: Modifiers) -> Self {
         Self {
             key,
             repeat,

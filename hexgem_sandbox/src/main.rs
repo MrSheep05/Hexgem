@@ -29,13 +29,13 @@ fn main() {
     let sandbox = Sandbox {};
     sandbox.run(|app| {
         let layer = ExampleLayer { name: "TEST" };
-        let glfw = app.get_window().as_ref().map(|w| w.get_glfw());
+        // let glfw = app.get_window().as_ref().map(|w| w.get_glfw());
 
-        app.window.take().map(|mut w| {
-            let imgui_layer = EguiLayer::create(w.get_window());
-            app.push_overlay(imgui_layer);
-            app.window = Some(w);
-        });
+        // app.window.take().map(|mut w| {
+        //     let imgui_layer = EguiLayer::create(w.get_window());
+        //     app.push_overlay(imgui_layer);
+        //     app.window = Some(w);
+        // });
         app.push_layer(layer);
     });
 }

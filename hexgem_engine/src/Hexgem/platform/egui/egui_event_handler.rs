@@ -35,13 +35,13 @@ impl HexgemEventHandler for EguiInputState {
         //KEY
         handler.dispatch::<KeyboardEvent, _>(EventType::KeyPressed, |e| {
             let event = e.into_egui_event(self);
-            self.modifiers = translate_modifiers(e.modifiers);
+            self.modifiers = translate_modifiers(&e.modifiers);
             self.input.events.push(event);
             None
         });
         handler.dispatch::<KeyboardEvent, _>(EventType::KeyReleased, |e| {
             let event = e.into_egui_event(self);
-            self.modifiers = translate_modifiers(e.modifiers);
+            self.modifiers = translate_modifiers(&e.modifiers);
             self.input.events.push(event);
             None
         });
