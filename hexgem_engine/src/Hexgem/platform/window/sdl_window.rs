@@ -1,4 +1,4 @@
-use log::error;
+use log::{error, info};
 use sdl2::pixels::Color;
 
 use crate::{
@@ -109,12 +109,19 @@ impl Window for SdlWindow {
         Self: Sized,
     {
         let context = sdl2::init().expect("Error occured on sdl2 init!");
+
         let video_subsystem = context.video().expect("Cannot create video subsystem");
         let window = video_subsystem
             .window(props.title, props.width, props.height)
             .position_centered()
             .build()
             .expect("Cannot create sdl window");
+        let gl_context = window
+            .gl_create_context()
+            .expect("Cannot create gl context");
+        window
+            .gl_make_current(&gl_context)
+            .expect("Cannot make glContext current");
         let mut canvas = window.into_canvas().build().unwrap();
         let event_pump = Some(
             context
@@ -130,6 +137,7 @@ impl Window for SdlWindow {
             vsync: true,
         };
         sdl_window.set_vsync(true);
+        info!("Created sdl window");
         Box::new(sdl_window)
     }
 
@@ -140,14 +148,14 @@ impl Window for SdlWindow {
     fn get_width(&self) -> i32 {
         match self.canvas.output_size() {
             Ok((w, _)) => w as i32,
-            Err(e) => panic!("Could not get size of output"),
+            Err(_) => panic!("Could not get size of output"),
         }
     }
 
     fn get_height(&self) -> i32 {
         match self.canvas.output_size() {
             Ok((_, h)) => h as i32,
-            Err(e) => panic!("Could not get size of output"),
+            Err(_) => panic!("Could not get size of output"),
         }
     }
 

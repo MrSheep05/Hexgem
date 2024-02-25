@@ -1,6 +1,5 @@
 use glfw::{Context, Glfw, GlfwReceiver, PWindow, WindowEvent};
 use log::{error, info};
-use std::mem;
 
 use crate::{
     Hexgem::{
@@ -8,22 +7,22 @@ use crate::{
         window::Window,
     },
     HexgemEvent::{
-        Event, EventType, Key, KeyboardEvent, Modifiers, MouseButton, MouseButtonEvent,
-        MouseMoveEvent, MouseScrollEvent, NoneEvent, WindowCloseEvent, WindowFocusEvent,
-        WindowMoveEvent, WindowResizeEvent,
+        Event, Key, KeyboardEvent, Modifiers, MouseButton, MouseButtonEvent, MouseMoveEvent,
+        MouseScrollEvent, NoneEvent, WindowCloseEvent, WindowFocusEvent, WindowMoveEvent,
+        WindowResizeEvent,
     },
 };
 
-pub struct MacOSWindow {
+pub struct GlfwWindow {
     vsync_on: bool,
     glfw: Glfw,
     window: PWindow,
     events: Option<GlfwReceiver<(f64, WindowEvent)>>,
 }
 
-impl MacOSWindow {
+impl GlfwWindow {
     fn get_event(event: Option<WindowEvent>) -> Box<dyn Event> {
-        let hexgemEvent: Box<dyn Event> = if let Some(event_some) = event {
+        let hexgem_event: Box<dyn Event> = if let Some(event_some) = event {
             match event_some {
                 WindowEvent::Pos(x, y) => Box::new(WindowMoveEvent::create(Position { x, y })),
                 WindowEvent::Size(width, height) => {
@@ -81,22 +80,18 @@ impl MacOSWindow {
         } else {
             Box::new(NoneEvent::create())
         };
-        return hexgemEvent;
+        return hexgem_event;
     }
 }
 
-impl Window for MacOSWindow {
+impl Window for GlfwWindow {
     fn create(
         props: crate::Hexgem::window::WindowProps,
     ) -> Box<(dyn crate::Hexgem::window::Window + 'static)> {
         let mut glfw =
             glfw::init(|err, description| error!("Error occured on glfw init - {}", description))
                 .expect("Could not init glfw!");
-        glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
-        glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
-        glfw.window_hint(glfw::WindowHint::OpenGlProfile(
-            glfw::OpenGlProfileHint::Core,
-        ));
+
         let (mut window, events) = glfw
             .create_window(
                 props.width,
@@ -115,6 +110,7 @@ impl Window for MacOSWindow {
             events: Some(events),
         };
         os_window.set_vsync(true);
+        info!("Created GLFW window");
         Box::new(os_window)
     }
 

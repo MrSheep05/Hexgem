@@ -7,7 +7,7 @@ use crate::HexgemEvent::{
 use super::{
     layer::Layer,
     layer_stack::LayerStack,
-    platform::MacOSWindow,
+    platform::HexgemWindow::*,
     window::{Window, WindowProps},
 };
 
@@ -30,7 +30,17 @@ pub struct Application {
 
 impl Application {
     pub fn create() -> Self {
-        let window = Some(MacOSWindow::create(WindowProps::default()));
+        let window = {
+            let props = WindowProps::default();
+            #[cfg(not(target_os = "macos"))]
+            {
+                Some(GlfwWindow::create(props))
+            }
+            #[cfg(target_os = "macos")]
+            {
+                Some(SdlWindow::create(props))
+            }
+        };
         let layer_stack = LayerStack::create();
         Self {
             layer_stack,
