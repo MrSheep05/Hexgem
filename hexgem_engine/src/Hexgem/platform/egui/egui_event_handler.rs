@@ -1,17 +1,19 @@
 use egui::pos2;
-use egui_gl_glfw::EguiInputState;
 
 use crate::HexgemEvent::{
     EventDispatcher, EventType, KeyboardEvent, MouseButtonEvent, MouseMoveEvent, MouseScrollEvent,
 };
 
-use super::egui_hexgem_event::{translate_modifiers, HexgemEventToEgui};
+use super::{
+    egui_hexgem_event::{translate_modifiers, HexgemEventToEgui},
+    egui_state::EguiStateInput,
+};
 
 pub trait HexgemEventHandler {
     fn handle_event(&mut self, event: &mut Box<dyn crate::HexgemEvent::Event>);
 }
 
-impl HexgemEventHandler for EguiInputState {
+impl HexgemEventHandler for EguiStateInput {
     fn handle_event(&mut self, event: &mut Box<dyn crate::HexgemEvent::Event>) {
         let handler = EventDispatcher::from(event);
         //MOUSE BUTTON

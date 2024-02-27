@@ -2,9 +2,9 @@ use crate::HexgemEvent::{
     Event, KeyboardEvent, Mod, Modifiers as Modifier, MouseButtonEvent, MouseMoveEvent,
     MouseScrollEvent,
 };
-use cli_clipboard::ClipboardProvider;
 use egui::{pos2, vec2, Key};
-use egui_gl_glfw::EguiInputState;
+
+use super::{egui_clipboard::ClipboardProvider, egui_state::EguiStateInput};
 
 pub fn translate_virtual_key_code(key: &crate::HexgemEvent::Key) -> egui::Key {
     match key {
@@ -102,11 +102,11 @@ pub fn translate_modifiers(keymod: &Modifier) -> egui::Modifiers {
     }
 }
 pub trait HexgemEventToEgui: Event {
-    fn into_egui_event(&self, state: &mut EguiInputState) -> egui::Event;
+    fn into_egui_event(&self, state: &mut EguiStateInput) -> egui::Event;
 }
 
 impl HexgemEventToEgui for MouseButtonEvent {
-    fn into_egui_event(&self, state: &mut EguiInputState) -> egui::Event {
+    fn into_egui_event(&self, state: &mut EguiStateInput) -> egui::Event {
         egui::Event::PointerButton {
             pos: state.pointer_pos,
             button: match self.button {
@@ -124,14 +124,14 @@ impl HexgemEventToEgui for MouseButtonEvent {
 }
 
 impl HexgemEventToEgui for MouseMoveEvent {
-    fn into_egui_event(&self, state: &mut EguiInputState) -> egui::Event {
+    fn into_egui_event(&self, state: &mut EguiStateInput) -> egui::Event {
         let pointer_pos = pos2(self.position.x as f32, self.position.y as f32);
         egui::Event::PointerMoved(pointer_pos)
     }
 }
 
 impl HexgemEventToEgui for KeyboardEvent {
-    fn into_egui_event(&self, state: &mut EguiInputState) -> egui::Event {
+    fn into_egui_event(&self, state: &mut EguiStateInput) -> egui::Event {
         let key = translate_virtual_key_code(&self.key);
         let modifiers = translate_modifiers(&self.modifiers);
         if self.pressed {
@@ -160,7 +160,7 @@ impl HexgemEventToEgui for KeyboardEvent {
 }
 
 impl HexgemEventToEgui for MouseScrollEvent {
-    fn into_egui_event(&self, state: &mut EguiInputState) -> egui::Event {
+    fn into_egui_event(&self, state: &mut EguiStateInput) -> egui::Event {
         egui::Event::Scroll(vec2(self.dx as f32, self.dy as f32))
     }
 }

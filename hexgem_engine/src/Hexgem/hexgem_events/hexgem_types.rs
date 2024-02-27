@@ -11,6 +11,8 @@ pub enum MouseButton {
     Button8,
     Unknown,
 }
+
+#[derive(PartialEq, PartialOrd, Debug)]
 pub enum Key {
     Space,
     Apostrophe,
@@ -161,6 +163,7 @@ impl Mod {
         self as isize
     }
 }
+#[derive(Debug)]
 pub struct Modifiers(isize);
 
 impl Modifiers {

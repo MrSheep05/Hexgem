@@ -1,7 +1,7 @@
-use log::{error, info, warn};
+use log::{info, warn};
 
 use crate::HexgemEvent::{
-    Event, EventDispatcher, EventType, MouseButtonEvent, MouseMoveEvent, WindowCloseEvent,
+    Event, EventDispatcher, EventType, Key, KeyboardEvent, Mod, WindowCloseEvent,
 };
 
 use super::{
@@ -85,7 +85,14 @@ impl Application {
                 //     }
                 //     None
                 // });
-
+                event_dispatcher.dispatch::<KeyboardEvent, _>(EventType::KeyPressed, |e| {
+                    info!("{:?}", e.modifiers.has(Mod::Gui));
+                    if e.modifiers.has(Mod::Gui) && e.key == Key::Q {
+                        warn!("CLOSE using cmd+q");
+                        self.running = false;
+                    }
+                    None
+                });
                 handle_vector.push(event_dispatcher.dispatch::<WindowCloseEvent, _>(
                     EventType::WindowClose,
                     |_| {

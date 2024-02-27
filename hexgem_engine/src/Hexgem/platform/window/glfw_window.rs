@@ -16,7 +16,7 @@ use crate::{
 pub struct GlfwWindow {
     vsync_on: bool,
     glfw: Glfw,
-    window: PWindow,
+    pub window: PWindow,
     events: Option<GlfwReceiver<(f64, WindowEvent)>>,
 }
 
@@ -83,7 +83,7 @@ impl GlfwWindow {
         return hexgem_event;
     }
 }
-
+crate::toAnyImpl!(GlfwWindow);
 impl Window for GlfwWindow {
     fn create(
         props: crate::Hexgem::window::WindowProps,
@@ -159,14 +159,14 @@ impl Window for GlfwWindow {
     fn get_mut(&mut self) -> Box<&mut dyn Window> {
         Box::new(self)
     }
-    #[cfg(not(target_os = "macos"))]
+    // #[cfg(not(target_os = "macos"))]
 
-    fn get_glfw(&self) -> &Glfw {
-        &self.glfw
-    }
+    // fn get_glfw(&self) -> &Glfw {
+    //     &self.glfw
+    // }
 
-    #[cfg(not(target_os = "macos"))]
-    fn get_window(&mut self) -> &mut glfw::PWindow {
-        &mut self.window
-    }
+    // #[cfg(not(target_os = "macos"))]
+    // fn get_window(&mut self) -> &mut glfw::PWindow {
+    //     &mut self.window
+    // }
 }

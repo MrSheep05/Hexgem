@@ -1,12 +1,8 @@
-use glfw::{flush_messages, Glfw, WindowEvent};
-use log::info;
+use std::any::Any;
 
-use crate::HexgemEvent::{
-    Event, KeyboardEvent, MouseButtonEvent, MouseMoveEvent, MouseScrollEvent, NoneEvent,
-    WindowCloseEvent, WindowFocusEvent, WindowMoveEvent, WindowResizeEvent,
-};
+use crate::HexgemEvent::Event;
 
-use super::core::{Position, Size};
+use super::core::ToAny;
 
 pub struct WindowProps {
     pub title: &'static str,
@@ -24,7 +20,7 @@ impl Default for WindowProps {
     }
 }
 
-pub trait Window {
+pub trait Window: ToAny {
     fn create(props: WindowProps) -> Box<dyn Window>
     where
         Self: Sized;
@@ -40,4 +36,12 @@ pub trait Window {
     fn set_vsync(&mut self, enabled: bool);
     // fn event_callback(&self) -> &dyn FnMut(Box<dyn Event>);
     // fn set_event_callback(&mut self, callback: Box<dyn FnMut(Box<dyn Event>)>);
+}
+
+pub fn get_window_struct<T: Window>(window: Box<&mut dyn Window>) -> &T {
+    let any = window.as_any();
+    match any.downcast_ref::<T>() {
+        Some(win) => win,
+        None => panic!("Cannot downcast window to that type!"),
+    }
 }

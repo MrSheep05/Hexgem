@@ -55,7 +55,7 @@ impl EguiContext {
     }
 
     pub fn handle_event(&mut self, event: &mut Box<(dyn Event + 'static)>) {
-        self.input_state.handle_event(event);
+        // self.input_state.handle_event(event);
     }
 
     pub fn render(&mut self, painter: &mut egui_backend::Painter) {

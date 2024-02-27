@@ -271,7 +271,7 @@ const SDL2_MODIFIERS: &[(sdl2::keyboard::Mod, Mod)] = &[
     (sdl2::keyboard::Mod::CAPSMOD, Mod::CapsLock),
     (sdl2::keyboard::Mod::LALTMOD, Mod::LeftAlt),
     (sdl2::keyboard::Mod::LCTRLMOD, Mod::LeftControl),
-    (sdl2::keyboard::Mod::LGUIMOD, Mod::LeftGui),
+    (sdl2::keyboard::Mod::LGUIMOD, Mod::LeftGui), //MAC COMMAND
     (sdl2::keyboard::Mod::LSHIFTMOD, Mod::LeftShift),
     (sdl2::keyboard::Mod::MODEMOD, Mod::ModeLock),
     (sdl2::keyboard::Mod::RALTMOD, Mod::RightAlt),

@@ -12,7 +12,7 @@ use crate::{
 };
 
 pub struct SdlWindow {
-    video_subsystem: sdl2::VideoSubsystem,
+    pub video_subsystem: sdl2::VideoSubsystem,
     context: sdl2::Sdl,
     canvas: sdl2::render::Canvas<sdl2::video::Window>,
     event_pump: Option<sdl2::EventPump>,
@@ -102,6 +102,7 @@ impl SdlWindow {
         }
     }
 }
+crate::toAnyImpl!(SdlWindow);
 
 impl Window for SdlWindow {
     fn create(props: crate::Hexgem::window::WindowProps) -> Box<dyn Window>
