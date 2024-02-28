@@ -1,5 +1,8 @@
 use log::{error, info};
-use sdl2::pixels::Color;
+use sdl2::{
+    pixels::Color,
+    video::{GLContext, GLProfile},
+};
 
 use crate::{
     Hexgem::core::{Position, Size},
@@ -14,7 +17,9 @@ use crate::{
 pub struct SdlWindow {
     pub video_subsystem: sdl2::VideoSubsystem,
     context: sdl2::Sdl,
-    canvas: sdl2::render::Canvas<sdl2::video::Window>,
+    pub gl_context: GLContext,
+    // window: sdl2::video::Window,
+    pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     event_pump: Option<sdl2::EventPump>,
     vsync: bool,
 }
@@ -112,17 +117,24 @@ impl Window for SdlWindow {
         let context = sdl2::init().expect("Error occured on sdl2 init!");
 
         let video_subsystem = context.video().expect("Cannot create video subsystem");
+        let gl_attr = video_subsystem.gl_attr();
+        gl_attr.set_context_profile(GLProfile::Core);
+        gl_attr.set_double_buffer(true);
+        gl_attr.set_multisample_samples(4);
+        gl_attr.set_framebuffer_srgb_compatible(true);
+        gl_attr.set_context_version(3, 2);
         let window = video_subsystem
             .window(props.title, props.width, props.height)
+            .opengl()
             .position_centered()
+            .resizable()
             .build()
             .expect("Cannot create sdl window");
+        gl::load_with(|c| window.subsystem().gl_get_proc_address(c) as *const _);
         let gl_context = window
             .gl_create_context()
             .expect("Cannot create gl context");
-        window
-            .gl_make_current(&gl_context)
-            .expect("Cannot make glContext current");
+
         let mut canvas = window.into_canvas().build().unwrap();
         let event_pump = Some(
             context
@@ -133,11 +145,14 @@ impl Window for SdlWindow {
         let mut sdl_window = Self {
             context,
             video_subsystem,
+            gl_context,
+            // window,
             canvas,
             event_pump,
             vsync: true,
         };
         sdl_window.set_vsync(true);
+
         info!("Created sdl window");
         Box::new(sdl_window)
     }
@@ -151,6 +166,7 @@ impl Window for SdlWindow {
             Ok((w, _)) => w as i32,
             Err(_) => panic!("Could not get size of output"),
         }
+        // self.window.size().0 as i32
     }
 
     fn get_height(&self) -> i32 {
@@ -158,6 +174,7 @@ impl Window for SdlWindow {
             Ok((_, h)) => h as i32,
             Err(_) => panic!("Could not get size of output"),
         }
+        // self.window.size().1 as i32
     }
 
     fn get_mut(&mut self) -> Box<&mut dyn Window> {
@@ -167,6 +184,7 @@ impl Window for SdlWindow {
     fn on_update(&mut self, callback: &mut dyn FnMut(Box<dyn Event>, Box<&mut dyn Window>)) {
         self.canvas.set_draw_color(Color::RGB(35, 39, 45));
         self.canvas.clear();
+
         self.event_pump.take().map(|mut event_pump| {
             let iter = event_pump.poll_iter();
             let mut count = 0;
@@ -179,7 +197,6 @@ impl Window for SdlWindow {
             }
             self.event_pump = Some(event_pump);
         });
-
         self.canvas.present();
     }
 

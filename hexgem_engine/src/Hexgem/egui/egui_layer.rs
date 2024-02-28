@@ -1,14 +1,13 @@
-use crate::Layer;
+use crate::{Layer, Window};
 
 use super::egui_window::EguiWindow;
-use glfw::Window;
 
 pub struct EguiLayer {
     egui_window: EguiWindow,
 }
 
 impl EguiLayer {
-    pub fn create(window: &mut Window) -> Self {
+    pub fn create(window: &Box<dyn Window>) -> Self {
         let egui_window = EguiWindow::create(window);
         Self { egui_window }
     }

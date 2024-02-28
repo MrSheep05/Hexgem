@@ -1,23 +1,26 @@
+use egui::{vec2, Image, Pos2, Rect};
+use log::info;
+
 use crate::{
-    Hexgem::{core::Size, platform::EguiPlatform::HexgemEventHandler},
+    Hexgem::{
+        core::Size,
+        platform::EguiPlatform::{EguiStateInput, HexgemEventHandler, Painter},
+    },
     HexgemEvent::Event,
+    Window,
 };
-use egui_backend::egui::{vec2, Pos2, Rect};
-use egui_gl_glfw as egui_backend;
-use glfw::Window;
 use std::time::Instant;
 
 pub struct EguiWindow {
     pub context: EguiContext,
-    pub painter: egui_backend::Painter,
+    pub painter: Painter,
 }
 
 impl EguiWindow {
-    pub fn create(window: &mut Window) -> Self {
-        let scale = window.get_content_scale().0;
-        let (width, height) = window.get_framebuffer_size();
-        let context = EguiContext::new(Size { width, height }, scale);
-        let painter = egui_backend::Painter::new(window);
+    pub fn create(window: &Box<dyn Window>) -> Self {
+        let painter = Painter::new(window);
+        let (width, height) = (window.get_width(), window.get_height());
+        let context = EguiContext::new(Size { width, height }, painter.get_scale());
         Self { painter, context }
     }
 
@@ -29,13 +32,13 @@ pub struct EguiContext {
     scale: f32,
     start_time: Instant,
     context: egui::Context,
-    input_state: egui_backend::EguiInputState,
+    input_state: EguiStateInput,
 }
 
 impl EguiContext {
     pub fn new(size: Size<i32>, scale: f32) -> Self {
         let context = egui::Context::default();
-        let input_state = egui_backend::EguiInputState::new(
+        let input_state = EguiStateInput::new(
             egui::RawInput {
                 screen_rect: Some(Rect::from_min_size(
                     Pos2::new(0f32, 0f32),
@@ -55,47 +58,24 @@ impl EguiContext {
     }
 
     pub fn handle_event(&mut self, event: &mut Box<(dyn Event + 'static)>) {
-        // self.input_state.handle_event(event);
+        self.input_state.handle_event(event);
     }
 
-    pub fn render(&mut self, painter: &mut egui_backend::Painter) {
+    pub fn render(&mut self, painter: &mut Painter) {
         self.input_state.input.time = Some(self.start_time.elapsed().as_secs_f64());
         self.context.begin_frame(self.input_state.input.take());
         self.input_state.pixels_per_point = self.scale;
         egui::Window::new("Egui with GLFW").show(&self.context, |ui| {
-            egui::TopBottomPanel::top("Top").show(&self.context, |ui| {
-                ui.menu_button("File", |ui| {
-                    {
-                        let _ = ui.button("test 1");
-                    }
-                    ui.separator();
-                    {
-                        let _ = ui.button("test 2");
-                    }
-                });
-            });
-
-
+            ui.separator();
             ui.label("A simple sine wave plotted onto a GL texture then blitted to an egui managed Image.");
-            ui.label(" ");
-            ui.text_edit_multiline(&mut "Provide Text");
-            ui.label(" ");            
-            ui.add(egui::Slider::new(&mut 50., 0.0..=50.0).text("Amplitude"));
-            ui.label(" ");
-
+           
+            if ui.button("Quit").clicked() {
+                info!("Exit");
+            }
         });
-        let egui::FullOutput {
-            platform_output,
-            textures_delta,
-            shapes,
-            pixels_per_point,
-            viewport_output: _,
-        } = self.context.end_frame();
-        if !platform_output.copied_text.is_empty() {
-            egui_backend::copy_to_clipboard(&mut self.input_state, platform_output.copied_text);
-        }
+        let output = self.context.end_frame();
+        self.input_state.process_output(&output);
 
-        let clipped_shapes = self.context.tessellate(shapes, pixels_per_point);
-        painter.paint_and_update_textures(1.0, &clipped_shapes, &textures_delta);
+        painter.paint_and_update(output, &self.context);
     }
 }

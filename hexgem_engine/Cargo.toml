@@ -6,13 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cli-clipboard = "0.4"
 egui = "0.26"
-egui_gl_glfw = "0.1.1"
-egui_sdl2_gl = "0.23.0"
-gl = "0.14"
-glfw = "0.55"
+gl = "0.14.0"
+glfw = "0.55.0"
 log = "0.4.20"
-sdl2 = "0.35"
-
-
+sdl2 = "0.36"

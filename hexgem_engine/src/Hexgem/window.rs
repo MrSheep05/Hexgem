@@ -38,7 +38,7 @@ pub trait Window: ToAny {
     // fn set_event_callback(&mut self, callback: Box<dyn FnMut(Box<dyn Event>)>);
 }
 
-pub fn get_window_struct<T: Window>(window: Box<&mut dyn Window>) -> &T {
+pub fn get_window_struct<'a, T: Window>(window: &'a Box<dyn Window>) -> &'a T {
     let any = window.as_any();
     match any.downcast_ref::<T>() {
         Some(win) => win,
