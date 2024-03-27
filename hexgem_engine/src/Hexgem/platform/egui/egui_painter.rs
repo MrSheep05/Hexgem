@@ -481,8 +481,7 @@ impl Painter {
             let macos_window: &SdlWindow = get_window_struct(window);
             unsafe {
                 macos_window
-                    .canvas
-                    .window()
+                    .window
                     .gl_make_current(&macos_window.gl_context)
                     .expect("Cannot reattach context");
                 gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as i32);

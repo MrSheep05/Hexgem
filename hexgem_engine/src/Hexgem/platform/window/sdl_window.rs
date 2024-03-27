@@ -18,8 +18,8 @@ pub struct SdlWindow {
     pub video_subsystem: sdl2::VideoSubsystem,
     context: sdl2::Sdl,
     pub gl_context: GLContext,
-    // window: sdl2::video::Window,
-    pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
+    pub window: sdl2::video::Window,
+    // pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     event_pump: Option<sdl2::EventPump>,
     vsync: bool,
 }
@@ -135,19 +135,18 @@ impl Window for SdlWindow {
             .gl_create_context()
             .expect("Cannot create gl context");
 
-        let mut canvas = window.into_canvas().build().unwrap();
         let event_pump = Some(
             context
                 .event_pump()
                 .expect("Could not create event_pump for sdl"),
         );
-        canvas.present();
+        // canvas.present();
         let mut sdl_window = Self {
             context,
             video_subsystem,
             gl_context,
-            // window,
-            canvas,
+            window,
+            // canvas,
             event_pump,
             vsync: true,
         };
@@ -162,19 +161,19 @@ impl Window for SdlWindow {
     }
 
     fn get_width(&self) -> i32 {
-        match self.canvas.output_size() {
-            Ok((w, _)) => w as i32,
-            Err(_) => panic!("Could not get size of output"),
-        }
-        // self.window.size().0 as i32
+        // match self.canvas.output_size() {
+        //     Ok((w, _)) => w as i32,
+        //     Err(_) => panic!("Could not get size of output"),
+        // }
+        self.window.size().0 as i32
     }
 
     fn get_height(&self) -> i32 {
-        match self.canvas.output_size() {
-            Ok((_, h)) => h as i32,
-            Err(_) => panic!("Could not get size of output"),
-        }
-        // self.window.size().1 as i32
+        // match self.canvas.output_size() {
+        //     Ok((_, h)) => h as i32,
+        //     Err(_) => panic!("Could not get size of output"),
+        // }
+        self.window.size().1 as i32
     }
 
     fn get_mut(&mut self) -> Box<&mut dyn Window> {
@@ -182,9 +181,12 @@ impl Window for SdlWindow {
     }
 
     fn on_update(&mut self, callback: &mut dyn FnMut(Box<dyn Event>, Box<&mut dyn Window>)) {
-        self.canvas.set_draw_color(Color::RGB(35, 39, 45));
-        self.canvas.clear();
-
+        // self.canvas.set_draw_color(Color::RGB(35, 39, 45));
+        // self.canvas.clear();
+        unsafe {
+            gl::ClearColor(0.13, 0.15, 0.18, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
         self.event_pump.take().map(|mut event_pump| {
             let iter = event_pump.poll_iter();
             let mut count = 0;
@@ -197,7 +199,8 @@ impl Window for SdlWindow {
             }
             self.event_pump = Some(event_pump);
         });
-        self.canvas.present();
+        // self.canvas.present();
+        self.window.gl_swap_window();
     }
 
     fn set_vsync(&mut self, enabled: bool) {
